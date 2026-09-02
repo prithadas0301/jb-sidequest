@@ -8,7 +8,7 @@
     "scoring/__init__.py":  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "scoring/cli.py":  "6066b6ce2e5d4d5275da6269c4a7ff63d10c15ddc940a4d0946f7f9139f79c78",
     "scoring/code_quality.py":  "1ea8f2a65b0b14a4c3730c6907e2413bdc1db5682c5c22d6ed8adf0dd8ea42c5",
-    "scoring/completion.py":  "1fb5ced0fa9c4641932a33e37d6734fb15f584a98b10f5e7ce8e0f26834b87b7",
+    "scoring/completion.py":  "09ef0f72c6ee44b772a20fd87cd4a400f6f05331e53c7ccb25b9bf224490d4e2",
     "scoring/correctness.py":  "a9e7b8c0f8e7e1798a2242684259e3dfb71a349bfb351cc73bbbd3350e469a7e",
     "scoring/detect_submission.py":  "6b345118b5fec99fc39fa3520cc0dd827018a6ad3c7bde522d4bc5ad1baba820",
     "scoring/integrity.py":  "6509d0cc844dc3e0e2964f56cbcd81976b1137992a596c22d2dc806a4a4452ab",
