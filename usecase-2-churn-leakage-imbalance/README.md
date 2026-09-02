@@ -93,10 +93,8 @@ def top_risk_customers(customer_ids: list[str], probabilities: list[float], n: i
     see the Performance row below."""
 ```
 
-This second one is a plain data-structures question hiding in an ML use
-case: the retention team doesn't want a ranked list of 800 customers,
-they want the top 20. Sorting everything just to throw away all but the
-top few is the wrong complexity class — see `starter/solution.py`'s hint.
+The retention team doesn't want a ranked list of 800 customers, they want
+the top 20 — build accordingly.
 
 Copy `starter/solution.py` into your submission folder to start. Also
 include the root README's required `README.md` (design, your

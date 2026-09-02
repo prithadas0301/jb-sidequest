@@ -54,16 +54,14 @@ That's the whole spec — the trusted tests check exactly this, nothing more.
   arrives later in the same list, gets this wrong — and webhook delivery
   order is never guaranteed in practice.
 - **Money is not a float.** Amount strings always have exactly 2 decimal
-  places — parse them into integer cents by splitting the string, and do
-  every calculation in integer cents. Route currency through `float` at
-  any point and you will eventually hit a case where several amounts that
-  should sum to exactly the charge don't — `0.1 + 0.2 != 0.3` in IEEE 754,
-  and summing more values makes it worse, not better. One of the trusted
-  tests constructs exactly this case.
+  places. Route currency through `float` at any point and you will
+  eventually hit a case where several amounts that should sum to exactly
+  the charge don't — `0.1 + 0.2 != 0.3` in IEEE 754, and summing more
+  values makes it worse, not better. One of the trusted tests constructs
+  exactly this case.
 - **The naive solution *works*.** "For each refund, scan every charge to
   find a match" gets the right answer on any small input. It's O(n²), and
-  it will fail the performance benchmark on a larger batch where an
-  indexed (`charge_id -> amount` dict) approach stays fast.
+  it will fail the performance benchmark on a larger batch.
 
 ---
 
@@ -106,10 +104,9 @@ python -m scoring.cli --usecase usecase-3-payment-investigation \
 
 ## 💡 Using Claude (or any AI assistant) here
 
-Useful for: explaining exactly why `0.1 + 0.2 != 0.3` and what the fix
-actually is; reviewing whether your orphan-detection logic really is
-order-independent or just happens to pass the one test case you tried;
-walking through why an index beats a nested scan. Less useful for:
+Useful for: explaining exactly why `0.1 + 0.2 != 0.3`; reviewing whether
+your orphan-detection logic really is order-independent or just happens
+to pass the one test case you tried. Less useful for:
 noticing on its own that amounts need to stay as strings-turned-integers
 rather than floats — ask an assistant to "parse the amount" with no
 further steering and there's a real chance you get `float(amount)`.

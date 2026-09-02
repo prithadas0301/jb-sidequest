@@ -58,16 +58,12 @@ checks exactly this spec, nothing more.
 
 - **Numerical stability.** The obvious "fast" variance formula —
   `sum(x*x)/n - mean**2` — catastrophically cancels when your data has a
-  large common offset and small real variance (which one of the trusted
-  tests deliberately constructs). You need an incrementally-maintained,
-  numerically stable computation — and the textbook version of Welford's
-  algorithm only covers *adding* a point, not *removing* one when it
-  leaves the window.
-- **Eviction from a priority structure.** A max-heap makes "top-k by
-  z-score" trivial for a growing stream — but heaps don't support
-  efficient arbitrary removal, and an anomaly has to *disappear* from
-  your results the moment it ages out of the window, not just stop
-  accumulating new ones. This is the actual data-structures problem here.
+  large common offset and small real variance, which one of the trusted
+  tests deliberately constructs.
+- **Eviction from a priority structure.** An anomaly has to *disappear*
+  from your results the moment it ages out of the window, not just stop
+  accumulating new ones — whatever you use to track top-k needs to
+  support that.
 - **The naive solution *works*.** "Keep a list of the window, recompute
   mean/stdev and re-sort every time" will pass every small correctness
   test. It'll fail the performance benchmark, and it may fail the
@@ -119,10 +115,10 @@ python -m scoring.cli --usecase usecase-1-streaming-topk-anomaly \
 
 ## 💡 Using Claude (or any AI assistant) here
 
-It's genuinely useful for explaining Welford's algorithm, walking through
-why heaps don't support efficient removal, or reviewing whether your
-specific implementation actually achieves the complexity you think it
-does. It is not a substitute for understanding *why* the naive version is
+It's genuinely useful for explaining unfamiliar concepts once you know
+what to ask about, or reviewing whether your specific implementation
+actually achieves the complexity you think it does. It is not a
+substitute for understanding *why* the naive version is
 wrong — ask it to generate a first pass and you'll very likely get
 something that passes small tests and fails the benchmark. Recognizing
 that gap, and knowing what to fix, is the actual skill this use case checks.

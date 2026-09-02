@@ -18,7 +18,7 @@ deliberately doesn't require an LLM; see its README for why.
 
 | # | Directory | Track | The trap |
 |---|---|---|---|
-| 1 | [`usecase-1-streaming-topk-anomaly/`](usecase-1-streaming-topk-anomaly/) | Python / data structures | Looks like a list and a sort. Actually needs a numerically-stable incremental variance computation and a priority structure that supports real eviction — the naive version passes small tests and fails under load |
+| 1 | [`usecase-1-streaming-topk-anomaly/`](usecase-1-streaming-topk-anomaly/) | Python / data structures | Looks like a list and a sort — the naive version passes small tests and quietly fails under load and adversarial data |
 | 2 | [`usecase-2-churn-leakage-imbalance/`](usecase-2-churn-leakage-imbalance/) | Traditional ML / Python | One feature is a near-perfect predictor on training data for reasons that don't hold up on the held-out set — plus an imbalanced label that punishes the wrong metric |
 | 3 | [`usecase-3-payment-investigation/`](usecase-3-payment-investigation/) | Python / data structures | Order-dependent bugs, un-deduplicated webhook redeliveries, and the classic float-money rounding trap, all under a performance requirement that punishes an O(n²) scan |
 | 4 | [`usecase-4-production-incident-investigator/`](usecase-4-production-incident-investigator/) | Retrieval + evidence correlation (RAG-shaped, no LLM) | Retrieval alone gets you the most keyword-relevant document, not the root cause — the real difficulty is correlating multiple independent sources and calibrating a confidence score that's honestly low when the evidence actually is thin |
