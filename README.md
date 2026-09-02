@@ -5,23 +5,27 @@
 **Time budget**: ~1 hour per use case
 **Who this is for**: graduates and candidates with roughly 1–3 years of
 experience. No banking/domain knowledge is assumed for use cases 1–2; use
-case 3 uses a payment-webhook scenario but doesn't require prior payments
-experience to solve.
+cases 3 and 4 use a payment/production-ops scenario but don't require
+prior experience in either to solve.
 **What it tests**: real Python, traditional machine learning (no GPU, no
-deep learning), and data structures — specifically, whether a candidate
-understands what they're doing well enough to catch and fix what an AI
-assistant gets wrong, not whether they can prompt one.
-**No API keys or paid accounts required for any use case.**
+deep learning), data structures, and retrieval/evidence correlation —
+specifically, whether a candidate understands what they're doing well
+enough to catch and fix what an AI assistant gets wrong, not whether they
+can prompt one.
+**No API keys or paid accounts required for any use case** — including
+use case 4, which is RAG-shaped (retrieval over a document corpus) but
+deliberately doesn't require an LLM; see its README for why.
 
 | # | Directory | Track | The trap |
 |---|---|---|---|
 | 1 | [`usecase-1-streaming-topk-anomaly/`](usecase-1-streaming-topk-anomaly/) | Python / data structures | Looks like a list and a sort. Actually needs a numerically-stable incremental variance computation and a priority structure that supports real eviction — the naive version passes small tests and fails under load |
 | 2 | [`usecase-2-churn-leakage-imbalance/`](usecase-2-churn-leakage-imbalance/) | Traditional ML / Python | One feature is a near-perfect predictor on training data for reasons that don't hold up on the held-out set — plus an imbalanced label that punishes the wrong metric |
 | 3 | [`usecase-3-payment-investigation/`](usecase-3-payment-investigation/) | Python / data structures | Order-dependent bugs, un-deduplicated webhook redeliveries, and the classic float-money rounding trap, all under a performance requirement that punishes an O(n²) scan |
+| 4 | [`usecase-4-production-incident-investigator/`](usecase-4-production-incident-investigator/) | Retrieval + evidence correlation (RAG-shaped, no LLM) | Retrieval alone gets you the most keyword-relevant document, not the root cause — the real difficulty is correlating multiple independent sources and calibrating a confidence score that's honestly low when the evidence actually is thin |
 
 Read each use case's own `README.md` before starting — full spec,
-starter code, exact scoring breakdown. Attempt one, two, or all three;
-one done well beats three done halfway.
+starter code, exact scoring breakdown. Attempt as many as you like; one
+done well beats four done halfway.
 
 ---
 
@@ -72,6 +76,12 @@ jb-sidequest/
 │
 ├── usecase-3-payment-investigation/
 │   └── (same shape as usecase 1)
+│
+├── usecase-4-production-incident-investigator/
+│   ├── data/incident_a_pool_exhaustion/   7 documents + query.txt (high-confidence scenario)
+│   ├── data/incident_b_ambiguous_delay/   7 documents + query.txt (low-confidence scenario)
+│   ├── data/loader.py                       loads one incident's query + document corpus
+│   └── (otherwise same shape as usecase 1)
 │
 └── submissions/                    your work goes here
     └── <your-github-username>/
@@ -199,7 +209,7 @@ You're expected to use AI tools here — that's realistic, not a shortcut
 being tested against. It's genuinely useful for explaining a concept
 you're rusty on, reviewing a solution once you've already spotted a
 specific concern, and handling boilerplate. What it won't reliably do: all
-three use cases are built so the fluent, obvious-looking first draft an
+four use cases are built so the fluent, obvious-looking first draft an
 assistant hands you passes small correctness checks and fails somewhere
 that actually matters. Noticing that gap, and knowing what's actually
 wrong, is what's being evaluated.

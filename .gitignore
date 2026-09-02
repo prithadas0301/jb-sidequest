@@ -9,6 +9,7 @@ venv/
 # local scoring scratch output - never commit, CI writes fresh each run
 **/.score/
 score-output/
+reports/
 
 # regenerated deterministically by each use case's data/generate_data.py
 usecase-1-streaming-topk-anomaly/data/*.csv

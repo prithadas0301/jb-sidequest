@@ -1,11 +1,13 @@
 # Hiring Guide (for reviewers, not candidates)
 
-`jb-sidequest` is a 3-use-case, ~1-hour-each hiring sidequest for
+`jb-sidequest` is a 4-use-case, ~1-hour-each hiring sidequest for
 graduates and 1–3 YOE candidates. Use case 1 is pure Python/data-structures;
 use case 2 is traditional ML with a deliberate leakage trap and class
 imbalance; use case 3 is a payment-webhook-themed data-structures problem
-(order independence, deduplication, exact money math) that doesn't
-require prior payments experience to solve. Everything is autoscored by
+(order independence, deduplication, exact money math); use case 4 is a
+retrieval + evidence-correlation problem (RAG-shaped, deliberately no LLM
+- see its README for why) over a synthetic production-incident document
+corpus. None require prior domain experience. Everything is autoscored by
 GitHub Actions on pull request. This doc covers the parts candidates
 don't need.
 
@@ -51,7 +53,7 @@ don't need.
 
 ## Calibration you should sanity-check before a real run
 
-All three use cases' `PERFORMANCE_THRESHOLDS` (in each `scoring_hooks.py`)
+All four use cases' `PERFORMANCE_THRESHOLDS` (in each `scoring_hooks.py`)
 are first-pass estimates, not independently benchmarked on your actual CI
 runner:
 
@@ -66,16 +68,32 @@ runner:
   20-minute timeout instead of hanging it - don't scale this up without
   also raising the timeout, or a genuinely bad submission could exhaust
   the whole CI job rather than just scoring 0 on this component.
+- **Use case 4**: `wall_clock_seconds` / `peak_memory_kb` for a single
+  `investigate()` call over a padded corpus (base incident A's 7
+  documents plus 5,000 extra synthetic log lines). Checks that retrieval
+  scales reasonably with corpus size (e.g. a single TF-IDF fit, not a
+  re-fit per document comparison) - the interesting difficulty in this
+  use case is correctness/calibration, not raw speed, so this component
+  matters less here than in 1-3; don't over-tune it.
 
 Write a quick correct reference solution for each (an O(log window)
 sliding-window tracker for use case 1; a `heapq.nlargest`-based selection
-for use case 2; a `charge_id -> amount` index for use case 3), run
+for use case 2; a `charge_id -> amount` index for use case 3; a
+TF-IDF-ranked, multi-source-corroboration approach for use case 4), run
 `python -m scoring.cli` against it, and adjust `floor`/`target` in the
 relevant `scoring_hooks.py` if your CI runner's numbers land somewhere
 you didn't expect. Same for use case 2's `AP_FLOOR`/`AP_TARGET` constants
 in `tests/test_solution.py` — the synthetic data is calibrated for
 roughly a 10% churn rate and a non-trivial-but-learnable signal, but
 "non-trivial" was designed, not measured against a real trained model.
+
+**Already measured, not just estimated**: a real end-to-end test submission
+(a RandomForest that correctly drops the leaky column, `class_weight="balanced"`,
+no other tuning) scored 0.4231 average precision on use case 2's held-out
+set against a target of 0.45 — close, but a reasonable non-tuned solution
+doesn't quite clear it. Consider lowering `AP_TARGET` to ~0.40, or leave
+it if you want "full credit" to require actual tuning beyond the obvious
+baseline; either way this is a measured data point, not a guess.
 
 ## How scoring actually works
 
@@ -111,6 +129,32 @@ sidequest, not a paid competition):
   walks `sys.modules` looking for it - true isolation needs a separate
   process/container. Not built here; flag it if you scale this beyond an
   internal hiring exercise.
+
+## Reporting across all candidates
+
+Per-PR autoscoring answers "does this one submission pass" - it doesn't
+give you a roster. `scripts/generate_candidate_report.py` scans every
+`submissions/<candidate>/<usecase>/` folder present in your checkout,
+re-scores each one with the same engine CI uses, and writes a
+consolidated report:
+
+```bash
+git pull                                          # make sure you have every merged submission locally
+python scripts/generate_candidate_report.py       # writes reports/latest/candidate_report.{md,csv}
+```
+
+`candidate_report.md` has one row per candidate-per-use-case (total +
+every component score) plus a "by candidate" summary listing which use
+cases each person attempted and their best score. `candidate_report.csv`
+is the same data for pasting into a spreadsheet. Both are gitignored
+(`reports/`) - this is a point-in-time report you generate on demand,
+not something committed to the repo.
+
+This only sees submissions that exist in your local checkout - `git pull`
+first, and remember each candidate's work lives on their own
+`submission/<name>` branch until merged, so decide whether you're
+reporting on merged submissions only (checkout `main`) or on everything
+still open too (checkout each branch, or script a loop that does).
 
 ## Local dry run before sending this to anyone
 
