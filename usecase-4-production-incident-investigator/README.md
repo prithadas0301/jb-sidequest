@@ -143,5 +143,5 @@ independent sources or just restates the top search hit, brainstorming
 what "confidence" should mean here before you write the formula. Less
 useful for: an assistant asked to "investigate this incident" with no
 further steering will very readily produce a confident-sounding answer
-for incident B too — recognizing that the evidence doesn't support that,
-and building something that reflects that honestly, is the actual point.
+for incident B too, regardless of how thin the evidence actually is —
+check your own output against both incidents before you trust it.

@@ -3,15 +3,9 @@
 ## 📋 Overview
 
 **Time budget**: ~1 hour per use case
-**Who this is for**: graduates and candidates with roughly 1–3 years of
-experience. No banking/domain knowledge is assumed for use cases 1–2; use
-cases 3 and 4 use a payment/production-ops scenario but don't require
-prior experience in either to solve.
-**What it tests**: real Python, traditional machine learning (no GPU, no
-deep learning), data structures, and retrieval/evidence correlation —
-specifically, whether a candidate understands what they're doing well
-enough to catch and fix what an AI assistant gets wrong, not whether they
-can prompt one.
+**No banking/domain knowledge needed** for any use case — 3 and 4 use a
+payment/production-ops scenario but don't require prior experience in
+either to solve.
 **No API keys or paid accounts required for any use case** — including
 use case 4, which is RAG-shaped (retrieval over a document corpus) but
 deliberately doesn't require an LLM; see its README for why.
@@ -205,14 +199,13 @@ has an actual bug, say so in your PR description instead of editing it.
 
 ## 💡 Using Claude (or any AI assistant) well
 
-You're expected to use AI tools here — that's realistic, not a shortcut
-being tested against. It's genuinely useful for explaining a concept
-you're rusty on, reviewing a solution once you've already spotted a
-specific concern, and handling boilerplate. What it won't reliably do: all
-four use cases are built so the fluent, obvious-looking first draft an
-assistant hands you passes small correctness checks and fails somewhere
-that actually matters. Noticing that gap, and knowing what's actually
-wrong, is what's being evaluated.
+You're welcome to use AI tools here — that's realistic, not a shortcut.
+It's genuinely useful for explaining a concept you're rusty on, reviewing
+a solution once you've already spotted a specific concern, and handling
+boilerplate. What it won't reliably do: a fluent, obvious-looking first
+draft from an assistant tends to pass small correctness checks and fail
+somewhere that actually matters — read each use case's README carefully
+and test against the trusted suite yourself before trusting a first pass.
 
 ---
 

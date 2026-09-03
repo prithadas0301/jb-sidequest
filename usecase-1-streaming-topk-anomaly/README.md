@@ -118,7 +118,7 @@ python -m scoring.cli --usecase usecase-1-streaming-topk-anomaly \
 It's genuinely useful for explaining unfamiliar concepts once you know
 what to ask about, or reviewing whether your specific implementation
 actually achieves the complexity you think it does. It is not a
-substitute for understanding *why* the naive version is
-wrong — ask it to generate a first pass and you'll very likely get
-something that passes small tests and fails the benchmark. Recognizing
-that gap, and knowing what to fix, is the actual skill this use case checks.
+substitute for understanding *why* the naive version is wrong — ask it to
+generate a first pass and you'll very likely get something that passes
+small tests and fails the benchmark, so test against the full suite
+yourself before trusting it.

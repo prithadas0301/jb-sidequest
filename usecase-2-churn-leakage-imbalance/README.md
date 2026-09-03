@@ -131,13 +131,11 @@ python -m scoring.cli --usecase usecase-2-churn-leakage-imbalance \
 
 Good uses: asking it to explain why average precision is a better metric
 than accuracy for imbalanced classification; reviewing your feature
-choices for anything that looks "too good to be true"; explaining
-`heapq.nlargest`'s complexity versus a full sort.
+choices for anything that looks "too good to be true".
 
 What it won't do reliably on its own: notice that
 `cancellation_request_flag` is suspicious. Ask an assistant to "build the
 best classifier you can" over this dataset with no further guidance, and
 there's a good chance it hands you exactly the trap — because from a
 pure "which features correlate with the label" view, that column looks
-like the best one you have. Recognizing *why* that's a warning sign
-rather than a gift is the part that's on you.
+like the best one you have.
