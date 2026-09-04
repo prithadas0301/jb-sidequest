@@ -57,8 +57,34 @@ Return a dict with exactly these keys:
 - **`confidence_score`** — `float`, 0-100
 - **`needs_human_review`** — `bool`, must equal `confidence_score < 50` exactly
 
-No exact wording is required anywhere the tests don't say so explicitly.
-Free-text fields are checked for key terms, not exact phrasing.
+No exact wording is required. Free-text fields are judged for substance
+against a private answer key, not exact phrasing.
+
+### What you submit
+
+There's no live code execution during grading. Instead, **you run your
+own `investigate()`** against both incidents' queries and commit the
+output:
+
+1. For each incident directory in `data/` (`incident_a_pool_exhaustion`,
+   `incident_b_ambiguous_delay`), load its query and corpus — e.g. via
+   `data/loader.py`'s `load_incident(name)` — and call your `investigate()`.
+2. Write both reports to a single `answers.json` in your submission
+   folder, keyed by incident directory name:
+
+   ```json
+   {
+     "incident_a_pool_exhaustion": { "root_cause": "...", "supporting_evidence": [...], "...": "..." },
+     "incident_b_ambiguous_delay": { "root_cause": "...", "supporting_evidence": [...], "...": "..." }
+   }
+   ```
+
+   Each value is exactly the dict your `investigate()` returned for that
+   incident — same keys, same shape, as the spec above.
+
+How you produce it is up to you (a short throwaway script, a REPL
+session, whatever) — it isn't graded, only `solution.py` and the
+resulting `answers.json` are.
 
 ---
 
@@ -66,8 +92,8 @@ Free-text fields are checked for key terms, not exact phrasing.
 
 A real production version of this tool would hand retrieved evidence to
 an LLM to write the narrative. That needs an API key, and this use case
-deliberately doesn't require one. What you're building is the two halves
-that *are* fully autogradable:
+deliberately doesn't require one to *build* — you're building the two
+halves that make the retrieval/correlation itself real:
 
 1. **Retrieval** — rank the corpus against the query yourself (TF-IDF
    cosine similarity, plain bag-of-words overlap, whatever approach you
@@ -78,10 +104,14 @@ that *are* fully autogradable:
    graded difficulty. Do independent sources agree with each other, and
    does your confidence score honestly reflect that?
 
-If you want to wire in a real LLM anyway to turn your structured report
-into better prose, go ahead — it's not graded either way, and CI never
-calls it (no API key available there). It won't move your score up or
-down.
+If you want to wire in a real LLM in your own `investigate()` to turn
+your structured report into better prose, go ahead — it's your code,
+run on your machine, to produce `answers.json`; nothing about how you
+got there is graded, only the JSON you submit and the `solution.py` that
+produced it. (Separately, the organizer's own review of your submitted
+`answers.json` against the private answer key may itself use an LLM as
+judge — that's not part of this repo and has nothing to do with whether
+you use one.)
 
 ---
 
@@ -106,7 +136,7 @@ down.
 - **The two incidents use the same document *types* on purpose.** If your
   approach only works for incident A because you hardcoded something
   specific to it (a filename, a magic string), it'll misbehave on
-  incident B — the tests check both.
+  incident B — your submitted `answers.json` is judged on both.
 
 ---
 
@@ -118,6 +148,11 @@ In your `submissions/<your-name>/usecase-2-production-incident-investigator/` fo
   as your starting point; it lays out a suggested function structure
   (ingest, retrieve, correlate, calibrate) but every step is a stub —
   retrieval included — for you to implement.
+- **`answers.json`** — your `investigate()`'s output for both incidents,
+  produced by running your own `solution.py` against each incident's
+  `query.txt` + corpus (see "What you submit" above for the exact shape).
+  This is what gets judged against the private answer key — not a live
+  run of your code.
 - **`README.md`** — see the root [README.md](../README.md)'s "Submission
   requirements" for what this needs to contain.
 
@@ -125,30 +160,40 @@ In your `submissions/<your-name>/usecase-2-production-incident-investigator/` fo
 
 ## ✅ How this is graded
 
-`tests/test_solution.py` (trusted, don't edit) runs `investigate()`
-against both incidents and checks: the report is well-formed and
-internally consistent (`needs_human_review` must exactly match the
-confidence threshold); incident A scores confidence ≥ 50, correctly names
-`payment-gateway-adapter`, extracts an MTTR close to the runbook's stated
-20 minutes, and cites at least 3 distinct source documents; incident B
-scores confidence < 50 and is flagged for review. `benchmark/perf_bench.py`
-separately times retrieval over a much larger synthetic corpus.
+**Correctness is judged manually**, not by an automated test suite:
+the organizer compares your submitted `answers.json` against a private
+answer key for both incidents — the same qualities the old trusted suite
+used to check (well-formed and internally consistent output;
+`needs_human_review` exactly matching the confidence threshold; incident
+A's high-confidence identification of `payment-gateway-adapter`, an MTTR
+close to 20 minutes, and multi-source evidence; incident B's correctly
+low, flagged confidence) — but read for substance against the key rather
+than pattern-matched by code. That review may itself use an LLM as a
+judge; how the organizer runs that comparison isn't part of this repo.
+
+The other five components are still measured automatically, straight
+off your `solution.py` — nothing about how Correctness is graded changes
+these:
 
 | Component | Weight | What it measures |
 |---|---|---|
-| Correctness | 30% | Well-formed output, incident A's high-confidence identification (component, MTTR, multi-source evidence), incident B's correctly-low confidence |
-| Performance | 20% | Wall-clock time and peak memory on a padded, much larger corpus |
+| Correctness | 30% | Your `answers.json` vs. the private answer key, judged manually for both incidents |
+| Performance | 20% | Wall-clock time and peak memory on a padded, much larger corpus (`benchmark/perf_bench.py`) |
 | Reusability | 15% | Function/method complexity, length, docstrings + type hints (see root README) |
 | Code quality | 15% | `ruff` findings per line |
 | Maintainability | 10% | `radon` maintainability index |
-| Completion | 10% | `solution.py` and a real `README.md` present |
+| Completion | 10% | `solution.py`, `answers.json`, and a real `README.md` present |
 
-Run it yourself before pushing:
+You can still run the automated portion yourself before submitting:
 ```bash
 # from the repo root
 python -m scoring.cli --usecase usecase-2-production-incident-investigator \
   --submission submissions/<your-name>/usecase-2-production-incident-investigator
 ```
+**Ignore the Correctness number this prints** — there's no test suite
+left for it to run, so it isn't a real signal either way. Performance,
+Reusability, Code quality, Maintainability, and Completion are still
+meaningful.
 
 ## 💡 Using Claude (or any AI assistant) here
 

@@ -20,7 +20,7 @@ WEIGHTS = {
     "completion": 0.10,
 }
 
-REQUIRED_FILES = ["solution.py"]
+REQUIRED_FILES = ["solution.py", "answers.json"]
 
 # First-pass estimates, not independently benchmarked on a real CI runner -
 # sanity-check with a known-good reference solution before running this for

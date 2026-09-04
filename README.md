@@ -10,7 +10,7 @@ done halfway.
 | # | Directory | Track | LLM required? | How it's scored |
 |---|---|---|---|---|
 | 1 | [`usecase-1-payment-investigation-agent/`](usecase-1-payment-investigation-agent/) | AI agent: tools + RAG + LLM orchestration | **Yes** — any LLM provider with tool-calling support | Manual evaluation against a private answer key (see `EVALUATION_CRITERIA.md`) |
-| 2 | [`usecase-2-production-incident-investigator/`](usecase-2-production-incident-investigator/) | Retrieval + evidence correlation (RAG-shaped, no LLM) | No | Autoscoring via GitHub Actions on pull request (6 weighted components) |
+| 2 | [`usecase-2-production-incident-investigator/`](usecase-2-production-incident-investigator/) | Retrieval + evidence correlation (RAG-shaped, no LLM) | No | Hybrid: correctness judged manually against a private answer key, other components autoscored via GitHub Actions (6 weighted components) |
 
 **Use case 1** asks you to build a payment-investigation AI assistant
 that answers 10 natural-language questions by combining structured data,
@@ -22,8 +22,11 @@ answer key.
 **Use case 2** asks you to build an incident-investigation function that
 correlates evidence across a document corpus and produces a structured
 report with a calibrated confidence score. No LLM, no API key — it's
-purely retrieval + correlation. Submit via pull request and the autoscoring
-pipeline runs automatically.
+purely retrieval + correlation. You run your own code against both
+incidents and submit the resulting `answers.json` alongside your
+`solution.py`; correctness is judged manually against a private answer
+key, while performance/code-quality/reusability/maintainability/completion
+still run automatically via the autoscoring pipeline on your PR.
 
 ---
 
@@ -98,7 +101,6 @@ jb-sidequest/
 │   │   ├── incident_a_pool_exhaustion/   7 documents + query.txt (high-confidence scenario)
 │   │   ├── incident_b_ambiguous_delay/   7 documents + query.txt (low-confidence scenario)
 │   │   └── loader.py                       loads one incident's query + document corpus
-│   ├── tests/test_solution.py        the trusted spec (do not edit)
 │   ├── benchmark/perf_bench.py       what scoring_hooks.run_benchmark() calls
 │   └── starter/solution.py           copy this into your submission folder
 │
@@ -106,6 +108,7 @@ jb-sidequest/
     └── <your-github-username>/
         └── usecase-2-production-incident-investigator/
             ├── solution.py
+            ├── answers.json
             └── README.md
 ```
 
@@ -113,12 +116,14 @@ jb-sidequest/
 contracts with no implementations. You implement the tools, RAG pipeline,
 and AI agent, then run `python main.py` to produce `submission.json`.
 
-**Use case 2** follows the autoscoring pattern: `README.md` (the brief),
-`scoring_hooks.py` (weights + thresholds), `tests/test_solution.py` (the
-actual spec, trusted, read-only), `benchmark/perf_bench.py` (performance
-harness), `starter/solution.py` (what you copy into your submission and
-fill in). Everything under `usecase-*/` other than what you create in
-`submissions/` is protected — see below.
+**Use case 2** pairs a still-autoscored code component with a manually
+judged output component: `README.md` (the brief), `scoring_hooks.py`
+(weights + thresholds), `benchmark/perf_bench.py` (performance harness),
+`starter/solution.py` (what you copy into your submission and fill in).
+There's no trusted pytest suite here anymore — correctness comes from
+reading your submitted `answers.json` against a private key, not from
+running your code in CI. Everything under `usecase-*/` other than what
+you create in `submissions/` is protected — see below.
 
 ---
 
@@ -149,7 +154,19 @@ pip install -r requirements.txt
 ./scripts/setup_candidate_branch.sh <your-github-username> usecase-2-production-incident-investigator
 
 cd usecase-2-production-incident-investigator
-pytest tests/ -v          # red at first, that's expected - start implementing
+# implement solution.py, then run it against both incidents yourself -
+# there's no trusted test suite to run instead. e.g.:
+python -c "
+from data.loader import load_incident
+import json, sys
+sys.path.insert(0, 'submissions/<your-github-username>/usecase-2-production-incident-investigator')
+import solution
+answers = {}
+for name in ['incident_a_pool_exhaustion', 'incident_b_ambiguous_delay']:
+    query, corpus = load_incident(name)
+    answers[name] = solution.investigate(query, corpus)
+print(json.dumps(answers, indent=2))
+"
 ```
 
 ---
@@ -170,15 +187,20 @@ with the required fields: `question_id`, `payment_id`, `answer`,
 `citations`, `facts`, `tools_used`. See `SUBMISSION_GUIDE.md` for the
 full schema and `sample_submission.json` for a worked example.
 
-### Use case 2 (autoscoring via PR)
+### Use case 2 (submit via PR; correctness judged manually)
 
 ```
 submissions/
 └── <your-github-username>/
     └── usecase-2-production-incident-investigator/
         ├── solution.py
+        ├── answers.json
         └── README.md
 ```
+
+`answers.json` is your `investigate()`'s output for both incidents (see
+that use case's README, "What you submit") — this, not a live run of
+your code, is what correctness is judged against.
 
 Your `README.md` **must** cover, in your own words:
 
@@ -199,54 +221,62 @@ git commit -m "Attempt usecase-2-production-incident-investigator"
 git push -u origin submission/<your-github-username>
 ```
 
-Open a pull request into `main`. This triggers autoscoring automatically
-— check the PR's **Checks** tab (or **Actions** on the repo) for the
-report.
+Open a pull request into `main`. This triggers the automated portion
+(performance/reusability/code-quality/maintainability/completion)
+immediately — check the PR's **Checks** tab (or **Actions** on the repo)
+for that report. Correctness is added separately once the organizer
+reviews your `answers.json` against the private answer key.
 
 **One participant per PR.** Attempting both use cases? Use case 1 is
-submitted as `submission.json` + source code (manual evaluation); use
-case 2 goes under `submissions/<your-github-username>/` and is submitted
-via PR (autoscoring). Don't mix submissions from different people in one
-PR.
+submitted as `submission.json` + source code (fully manual evaluation);
+use case 2 goes under `submissions/<your-github-username>/` and is
+submitted via PR (automated components + manually judged correctness).
+Don't mix submissions from different people in one PR.
 
 ---
 
-## How autoscoring works (use case 2 only)
+## How grading works (use case 2 only)
 
 Use case 2 is scored on 6 weighted components — weights and thresholds
-live in `scoring_hooks.py`, nothing hidden except whether a protected
-file's hash matches.
+live in `scoring_hooks.py`. Five of them are still autoscored straight
+off your `solution.py`; Correctness is judged manually, by comparing
+your submitted `answers.json` against a private answer key (that review
+may itself use an LLM as judge — the judging logic isn't part of this
+repo, only the submission format is).
 
 | Component | What it measures |
 |---|---|
-| **Correctness** | The use case's real pytest suite |
-| **Performance** | A timed benchmark against declared thresholds — where a wrong-complexity solution loses points a correctness test can't catch |
+| **Correctness** | Manual: your `answers.json` vs. the private answer key, for both incidents |
+| **Performance** | A timed benchmark against declared thresholds — where a wrong-complexity solution loses points correctness alone can't catch |
 | **Reusability** | Cyclomatic complexity, function length, and docstring+type-hint coverage on public functions, averaged |
 | **Code quality** | `ruff` findings per line, submission files only |
 | **Maintainability** | `radon` maintainability index, submission files only |
 | **Completion** | Required files present and non-trivial, README actually contains what's asked for above |
 
-Run the exact same check yourself before pushing:
+Run the automated five yourself before pushing (Correctness will print
+as 0 — there's no test suite left for it to run, ignore that number):
 ```bash
 python -m scoring.cli --usecase usecase-2-production-incident-investigator \
   --submission submissions/<your-github-username>/usecase-2-production-incident-investigator
 ```
 
-**Autoscoring runs automatically the moment your PR is opened against
+**The automated components run the moment your PR is opened against
 `main` with a change under `submissions/**`** — the workflow trigger is
 path-filtered to that folder specifically so pushing to your branch or
-opening the PR is all it takes, no manual step.
+opening the PR is all it takes, no manual step. Correctness itself is
+added separately by the organizer's manual review.
 
-Use case 1 is **not** autoscoring — the organizer runs your code and
-evaluates the output manually. See `EVALUATION_CRITERIA.md` in that use
-case's directory for the scoring rubric.
+Use case 1 is **fully** manual — the organizer runs your code and
+evaluates the output manually, with no autoscored components at all.
+See `EVALUATION_CRITERIA.md` in that use case's directory for the
+scoring rubric.
 
 ---
 
 ## Protecting the autoscoring engine (use case 2)
 
 **You may only add new files under `submissions/<your-username>/`.**
-Everything else — `scoring/`, use case 2's `tests/`, `scoring_hooks.py`,
+Everything else — `scoring/`, use case 2's `scoring_hooks.py`,
 `benchmark/`, the workflow files, docs, this README — is hashed and
 checked on every PR, *before* anything else runs:
 
@@ -273,9 +303,10 @@ You're welcome to use AI tools here — that's realistic, not a shortcut.
 It's genuinely useful for explaining a concept you're rusty on, reviewing
 a solution once you've already spotted a specific concern, and handling
 boilerplate. What it won't reliably do: a fluent, obvious-looking first
-draft from an assistant tends to pass small correctness checks and fail
-somewhere that actually matters — read each use case's README carefully
-and test against the trusted suite yourself before trusting a first pass.
+draft from an assistant tends to look plausible and fail somewhere that
+actually matters — read each use case's README carefully and check your
+own output against the actual source material (the incident corpus, for
+use case 2) before trusting a first pass.
 
 ---
 
