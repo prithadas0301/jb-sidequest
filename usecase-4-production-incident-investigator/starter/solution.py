@@ -8,7 +8,10 @@ Required interface - do not change the signature:
         # corpus: filename -> full document text, e.g.
         #   {"logs.md": "...", "architecture.md": "...", "api_specs.md": "...",
         #    "deployment_history.md": "...", "previous_incidents.md": "...",
-        #    "runbooks.md": "...", "known_issues.md": "..."}
+        #    "runbooks.md": "...", "known_issues.csv": "..."}
+        # Not every value is markdown prose - known_issues is a raw CSV
+        # catalog (multiple rows, most of them irrelevant to any given
+        # incident). Treat every corpus value as plain text either way.
         ...
 
 Return a dict with exactly these keys:

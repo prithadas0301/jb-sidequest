@@ -11,11 +11,18 @@
 You're an on-call engineer's investigation assistant. You're given a
 corpus of documents for one production incident — application logs, an
 architecture overview, API specs, deployment history, previous incidents,
-runbooks, and known issues — plus a plain-English question describing
-the symptom. Your job is to correlate evidence *across* those documents
-and produce a structured incident report: probable root cause,
+runbooks, and a known-issues catalog — plus a plain-English question
+describing the symptom. Your job is to correlate evidence *across* those
+documents and produce a structured incident report: probable root cause,
 supporting evidence, impacted systems, mean time to recover, recommended
 remediation, and a calibrated confidence score.
+
+Not every document is markdown prose: `known_issues.csv` is a flat CSV
+catalog with one row per known issue (`issue_id,title,signature,
+affected_component,notes`) — several rows, most of them irrelevant to any
+given incident, same as a real issue tracker export would look. Your
+retrieval/correlation has to work over raw text regardless of which
+file it came from, not assume everything is a markdown document.
 
 There are **two incidents** in `data/`, and they're deliberately
 different in kind:
