@@ -1,4 +1,4 @@
-# 🔎 Use Case 4 — Production Incident Investigator
+# 🔎 Use Case 2 — Production Incident Investigator
 
 **Track**: Retrieval + evidence correlation (RAG-shaped, no LLM required)
 **Estimated time**: ~1 hour
@@ -65,9 +65,9 @@ Free-text fields are checked for key terms, not exact phrasing.
 ## 🧠 A note on what "RAG" means here
 
 A real production version of this tool would hand retrieved evidence to
-an LLM to write the narrative. That needs an API key, and every other use
-case in this repo deliberately doesn't — so this one doesn't either. What
-you're building is the two halves that *are* fully autogradable:
+an LLM to write the narrative. That needs an API key, and this use case
+deliberately doesn't require one. What you're building is the two halves
+that *are* fully autogradable:
 
 1. **Retrieval** — rank the corpus against the query (the starter scaffolds
    this with TF-IDF cosine similarity; that's genuinely representative of
@@ -110,7 +110,7 @@ down.
 
 ## 🎯 What you're building
 
-In your `submissions/<your-name>/usecase-4-production-incident-investigator/` folder:
+In your `submissions/<your-name>/usecase-2-production-incident-investigator/` folder:
 
 - **`solution.py`** — your `investigate()`. Copy `starter/solution.py` in
   as your starting point; it has working retrieval and a stubbed-out
@@ -143,8 +143,8 @@ separately times retrieval over a much larger synthetic corpus.
 Run it yourself before pushing:
 ```bash
 # from the repo root
-python -m scoring.cli --usecase usecase-4-production-incident-investigator \
-  --submission submissions/<your-name>/usecase-4-production-incident-investigator
+python -m scoring.cli --usecase usecase-2-production-incident-investigator \
+  --submission submissions/<your-name>/usecase-2-production-incident-investigator
 ```
 
 ## 💡 Using Claude (or any AI assistant) here

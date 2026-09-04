@@ -15,7 +15,7 @@ and evaluates the resulting `submission.json` against a private answer key.
 ### 1. Answer correctness (40%)
 
 Each of the 10 questions has an expected answer.  The evaluator checks
-whether the candidate's `answer` field contains the key facts and
+whether the participant's `answer` field contains the key facts and
 recommendations:
 
 - Correct threshold identification (amount, currency, region).

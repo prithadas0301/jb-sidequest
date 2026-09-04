@@ -1,6 +1,6 @@
 name: Score submission
 
-# One generic workflow handles every candidate + every use case: which
+# One generic workflow handles every participant + every use case: which
 # use case(s) to grade is derived from which submissions/<name>/usecase-*/
 # folder(s) the PR touches (see scoring/detect_submission.py).
 on:
@@ -45,7 +45,7 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Determine candidate + use case(s) touched by this PR
+      - name: Determine participant + use case(s) touched by this PR
         id: detect
         run: |
           git fetch origin main

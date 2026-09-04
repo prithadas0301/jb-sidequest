@@ -13,7 +13,7 @@ hashes against the checked-out tree and fails closed on:
   - any protected file that was deleted
   - any new file created OUTSIDE submissions/ that wasn't already tracked
 
-A new file created INSIDE submissions/ is fine - that's just a candidate
+A new file created INSIDE submissions/ is fine - that's just a participant
 adding their own work.
 
 CI runs this as the very first step, before installing dependencies or
@@ -40,13 +40,11 @@ IGNORE_DIR_NAMES = {
     ".score", "score-output", "node_modules", ".mypy_cache",
 }
 IGNORE_FILE_SUFFIXES = {".pyc"}
-# Regenerated deterministically by each use case's data/generate_data.py -
-# never committed, so never part of the protected snapshot either.
-IGNORE_RELATIVE_PREFIXES = (
-    "usecase-1-streaming-topk-anomaly/data/",
-    "usecase-2-churn-leakage-imbalance/data/",
-    "usecase-3-payment-investigation/data/",
-)
+# No data files are generated at runtime in the current use cases — all
+# data is committed and should be protected. If a future use case adds a
+# data/generate_data.py that produces uncommitted files, add its prefix
+# here with IGNORE_SUFFIXES_UNDER_PREFIX to skip those from the manifest.
+IGNORE_RELATIVE_PREFIXES: tuple[str, ...] = ()
 IGNORE_SUFFIXES_UNDER_PREFIX = {".csv", ".json"}
 MANIFEST_RELATIVE_PATH = "scoring/PROTECTED_MANIFEST.json"
 

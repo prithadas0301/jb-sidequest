@@ -1,4 +1,4 @@
-"""Trusted test suite for use case 4. This IS the spec - do not edit (see
+"""Trusted test suite for use case 2. This IS the spec - do not edit (see
 'Protecting the autoscoring engine' in the root README).
 
 Spec being tested (see ../README.md for the candidate-facing version):

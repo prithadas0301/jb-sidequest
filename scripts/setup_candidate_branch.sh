@@ -7,13 +7,14 @@
 #   ./scripts/setup_candidate_branch.sh <candidate-slug> <usecase-dir>
 #
 # Example:
-#   ./scripts/setup_candidate_branch.sh jane-doe usecase-1-streaming-topk-anomaly
+#   ./scripts/setup_candidate_branch.sh jane-doe usecase-2-production-incident-investigator
 set -euo pipefail
 
 if [ $# -ne 2 ]; then
   echo "Usage: $0 <candidate-slug> <usecase-dir>" >&2
   echo "  candidate-slug: lowercase, hyphenated, e.g. jane-doe (use your GitHub username)" >&2
-  echo "  usecase-dir:    one of the usecase-*/ directories in this repo" >&2
+  echo "  usecase-dir:    one of the usecase-*/ directories in this repo (use case 2 only —" >&2
+  echo "                  use case 1 has no starter/ directory, see its README)" >&2
   exit 1
 fi
 

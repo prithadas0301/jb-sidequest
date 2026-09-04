@@ -24,7 +24,7 @@ start".  All documents:
 ## Directory structure
 
 ```text
-usecase-3-payment-investigation-agent/
+usecase-1-payment-investigation-agent/
 ├── main.py                  # Entry point — run this
 ├── requirements.txt         # Python dependencies
 ├── .env.example             # LLM configuration template
