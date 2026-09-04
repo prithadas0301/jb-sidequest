@@ -115,6 +115,12 @@ cp .env.example .env  # Add your LLM API key
 python main.py --questions questions/questions.json --output submission.json
 ```
 
+**Don't have an LLM API key handy?** [open-free-llm-api/awesome-freellm-apis](https://github.com/open-free-llm-api/awesome-freellm-apis)
+is a community-maintained directory of free-tier LLM APIs across many
+providers (rate limits, context windows, and setup snippets included) —
+useful if you want to attempt use case 1 without signing up for a paid
+plan first.
+
 Follow the reading order in `PARTICIPANT_INSTRUCTIONS.md` → "Before you
 start". Key documents: `PROBLEM_STATEMENT.md`, `DATA_NOTES.md`,
 `AI_ARCHITECTURE_REQUIREMENTS.md`, `EVALUATION_CRITERIA.md`,
