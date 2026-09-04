@@ -2,15 +2,15 @@
 
 ## Overview
 
-Two use cases, each with a different evaluation model. Read each use
-case's own `README.md` before starting — full spec, starter code, exact
-scoring breakdown. Attempt as many as you like; one done well beats two
-done halfway.
+Two use cases, both manually evaluated. Read each use case's own
+`README.md` before starting — full spec, starter code, exact submission
+format. Attempt as many as you like; one done well beats two done
+halfway.
 
 | # | Directory | Track | LLM required? | How it's scored |
 |---|---|---|---|---|
 | 1 | [`usecase-1-payment-investigation-agent/`](usecase-1-payment-investigation-agent/) | AI agent: tools + RAG + LLM orchestration | **Yes** — any LLM provider with tool-calling support | Manual evaluation against a private answer key (see `EVALUATION_CRITERIA.md`) |
-| 2 | [`usecase-2-production-incident-investigator/`](usecase-2-production-incident-investigator/) | Retrieval + evidence correlation (RAG-shaped, no LLM) | No | Hybrid: correctness judged manually against a private answer key, other components autoscored via GitHub Actions (6 weighted components) |
+| 2 | [`usecase-2-production-incident-investigator/`](usecase-2-production-incident-investigator/) | Retrieval + evidence correlation (RAG-shaped, no LLM) | No | Manual evaluation against a private answer key, possibly using an LLM as judge |
 
 **Use case 1** asks you to build a payment-investigation AI assistant
 that answers 10 natural-language questions by combining structured data,
@@ -23,10 +23,9 @@ answer key.
 correlates evidence across a document corpus and produces a structured
 report with a calibrated confidence score. No LLM, no API key — it's
 purely retrieval + correlation. You run your own code against both
-incidents and submit the resulting `answers.json` alongside your
-`solution.py`; correctness is judged manually against a private answer
-key, while performance/code-quality/reusability/maintainability/completion
-still run automatically via the autoscoring pipeline on your PR.
+incidents' queries and submit the resulting `answers.json` alongside
+your `solution.py`; the organizer judges it against a private answer
+key, the same way use case 1 is judged.
 
 ---
 
@@ -36,32 +35,11 @@ still run automatically via the autoscoring pipeline on your PR.
 jb-sidequest/
 ├── README.md                     you are here — participant-facing overview
 ├── LICENSE
-├── requirements.txt                shared deps for scoring/ + use case 2
+├── requirements.txt                deps for use case 2's solution.py
 ├── .gitignore
 │
 ├── docs/
 │   └── HIRING_GUIDE.md             for organizers/admins, not participants
-│
-├── scripts/
-│   ├── setup_candidate_branch.sh   creates your branch + starter files (use case 2)
-│   └── generate_protected_manifest.py   admin-only, regenerates the integrity manifest
-│
-├── scoring/                        shared autoscoring engine (use case 2 only, do not edit)
-│   ├── cli.py                        entry point: `python -m scoring.cli --usecase ... --submission ...`
-│   ├── integrity.py                  anti-tamper check, runs first in CI
-│   ├── detect_submission.py          figures out who/what a PR is scoring
-│   ├── submission_loader.py          dynamically imports your solution.py
-│   ├── correctness.py                runs a use case's pytest suite -> score
-│   ├── performance.py                runs a use case's benchmark -> score
-│   ├── reusability.py                complexity + length + docstring/type-hint coverage -> score
-│   ├── code_quality.py               ruff findings -> score
-│   ├── maintainability.py            radon maintainability index -> score
-│   ├── completion.py                 required files + README content -> score
-│   ├── report.py                     combines the above into score_report.{md,json}
-│   └── PROTECTED_MANIFEST.json       sha256 of every protected file (see below)
-│
-├── .github/workflows/
-│   └── score-submission.yml        the autoscoring pipeline (triggers on PR)
 │
 ├── usecase-1-payment-investigation-agent/
 │   ├── README.md                     the brief + quick start
@@ -94,36 +72,27 @@ jb-sidequest/
 │   └── agent/                         AI agent (implement this)
 │       └── agent.py
 │
-├── usecase-2-production-incident-investigator/
-│   ├── README.md                     the brief, spec, and scoring table
-│   ├── scoring_hooks.py              this use case's weights + performance thresholds
-│   ├── data/
-│   │   ├── incident_a_pool_exhaustion/   7 documents + query.txt (high-confidence scenario)
-│   │   ├── incident_b_ambiguous_delay/   7 documents + query.txt (low-confidence scenario)
-│   │   └── loader.py                       loads one incident's query + document corpus
-│   ├── benchmark/perf_bench.py       what scoring_hooks.run_benchmark() calls
-│   └── starter/solution.py           copy this into your submission folder
-│
-└── submissions/                    your work goes here
-    └── <your-github-username>/
-        └── usecase-2-production-incident-investigator/
-            ├── solution.py
-            ├── answers.json
-            └── README.md
+└── usecase-2-production-incident-investigator/
+    ├── README.md                     the brief, spec, and submission format
+    ├── data/
+    │   ├── incident_a_pool_exhaustion/   7 documents + query.txt (high-confidence scenario)
+    │   ├── incident_b_ambiguous_delay/   7 documents + query.txt (low-confidence scenario)
+    │   └── loader.py                       loads one incident's query + document corpus
+    └── starter/solution.py           copy this into your own working copy
 ```
 
 **Use case 1** provides method-only interfaces — function signatures and
 contracts with no implementations. You implement the tools, RAG pipeline,
 and AI agent, then run `python main.py` to produce `submission.json`.
 
-**Use case 2** pairs a still-autoscored code component with a manually
-judged output component: `README.md` (the brief), `scoring_hooks.py`
-(weights + thresholds), `benchmark/perf_bench.py` (performance harness),
-`starter/solution.py` (what you copy into your submission and fill in).
-There's no trusted pytest suite here anymore — correctness comes from
-reading your submitted `answers.json` against a private key, not from
-running your code in CI. Everything under `usecase-*/` other than what
-you create in `submissions/` is protected — see below.
+**Use case 2** gives you `README.md` (the brief) and `starter/solution.py`
+(the function you implement); `data/loader.py` is a small helper for
+loading each incident's query + corpus, not something you need to
+modify. You run your own `investigate()` against both incidents and
+produce `answers.json` yourself — there's no test suite or CI in this
+repo for either use case; both are evaluated the same way, by a human
+(and possibly an LLM-as-judge review) reading your submitted output
+against a private answer key.
 
 ---
 
@@ -150,22 +119,21 @@ start". Key documents: `PROBLEM_STATEMENT.md`, `DATA_NOTES.md`,
 
 ```bash
 pip install -r requirements.txt
-
-./scripts/setup_candidate_branch.sh <your-github-username> usecase-2-production-incident-investigator
-
 cd usecase-2-production-incident-investigator
-# implement solution.py, then run it against both incidents yourself -
-# there's no trusted test suite to run instead. e.g.:
+cp starter/solution.py solution.py   # your own working copy
+
+# implement investigate() in solution.py, then run it against both
+# incidents yourself and save the output as answers.json, e.g.:
 python -c "
 from data.loader import load_incident
-import json, sys
-sys.path.insert(0, 'submissions/<your-github-username>/usecase-2-production-incident-investigator')
+import json
 import solution
 answers = {}
 for name in ['incident_a_pool_exhaustion', 'incident_b_ambiguous_delay']:
     query, corpus = load_incident(name)
     answers[name] = solution.investigate(query, corpus)
-print(json.dumps(answers, indent=2))
+with open('answers.json', 'w') as f:
+    json.dump(answers, f, indent=2)
 "
 ```
 
@@ -173,7 +141,7 @@ print(json.dumps(answers, indent=2))
 
 ## Submission requirements
 
-### Use case 1 (manual evaluation)
+### Use case 1
 
 Run the official command and submit the resulting `submission.json` along
 with your source code:
@@ -187,22 +155,11 @@ with the required fields: `question_id`, `payment_id`, `answer`,
 `citations`, `facts`, `tools_used`. See `SUBMISSION_GUIDE.md` for the
 full schema and `sample_submission.json` for a worked example.
 
-### Use case 2 (submit via PR; correctness judged manually)
+### Use case 2
 
-```
-submissions/
-└── <your-github-username>/
-    └── usecase-2-production-incident-investigator/
-        ├── solution.py
-        ├── answers.json
-        └── README.md
-```
-
-`answers.json` is your `investigate()`'s output for both incidents (see
-that use case's README, "What you submit") — this, not a live run of
-your code, is what correctness is judged against.
-
-Your `README.md` **must** cover, in your own words:
+Submit three things to the organizer: `solution.py`, the `answers.json`
+it produced for both incidents (see that use case's README, "What you
+submit"), and a `README.md` covering, in your own words:
 
 - **Design** — how your solution is structured and why
 - **Your understanding of the problem** — what the actual difficulty
@@ -211,89 +168,12 @@ Your `README.md` **must** cover, in your own words:
   and abandoned, and tradeoffs made under the time limit
 - **Your name, phone number, and email**
 
-This is graded (Completion, below) and it's what a reviewer reads first.
+This `README.md` is graded alongside the rest and it's what a reviewer
+reads first.
 
-#### Submitting (use case 2)
-
-```bash
-git add submissions/<your-github-username>/
-git commit -m "Attempt usecase-2-production-incident-investigator"
-git push -u origin submission/<your-github-username>
-```
-
-Open a pull request into `main`. This triggers the automated portion
-(performance/reusability/code-quality/maintainability/completion)
-immediately — check the PR's **Checks** tab (or **Actions** on the repo)
-for that report. Correctness is added separately once the organizer
-reviews your `answers.json` against the private answer key.
-
-**One participant per PR.** Attempting both use cases? Use case 1 is
-submitted as `submission.json` + source code (fully manual evaluation);
-use case 2 goes under `submissions/<your-github-username>/` and is
-submitted via PR (automated components + manually judged correctness).
-Don't mix submissions from different people in one PR.
-
----
-
-## How grading works (use case 2 only)
-
-Use case 2 is scored on 6 weighted components — weights and thresholds
-live in `scoring_hooks.py`. Five of them are still autoscored straight
-off your `solution.py`; Correctness is judged manually, by comparing
-your submitted `answers.json` against a private answer key (that review
-may itself use an LLM as judge — the judging logic isn't part of this
-repo, only the submission format is).
-
-| Component | What it measures |
-|---|---|
-| **Correctness** | Manual: your `answers.json` vs. the private answer key, for both incidents |
-| **Performance** | A timed benchmark against declared thresholds — where a wrong-complexity solution loses points correctness alone can't catch |
-| **Reusability** | Cyclomatic complexity, function length, and docstring+type-hint coverage on public functions, averaged |
-| **Code quality** | `ruff` findings per line, submission files only |
-| **Maintainability** | `radon` maintainability index, submission files only |
-| **Completion** | Required files present and non-trivial, README actually contains what's asked for above |
-
-Run the automated five yourself before pushing (Correctness will print
-as 0 — there's no test suite left for it to run, ignore that number):
-```bash
-python -m scoring.cli --usecase usecase-2-production-incident-investigator \
-  --submission submissions/<your-github-username>/usecase-2-production-incident-investigator
-```
-
-**The automated components run the moment your PR is opened against
-`main` with a change under `submissions/**`** — the workflow trigger is
-path-filtered to that folder specifically so pushing to your branch or
-opening the PR is all it takes, no manual step. Correctness itself is
-added separately by the organizer's manual review.
-
-Use case 1 is **fully** manual — the organizer runs your code and
-evaluates the output manually, with no autoscored components at all.
-See `EVALUATION_CRITERIA.md` in that use case's directory for the
-scoring rubric.
-
----
-
-## Protecting the autoscoring engine (use case 2)
-
-**You may only add new files under `submissions/<your-username>/`.**
-Everything else — `scoring/`, use case 2's `scoring_hooks.py`,
-`benchmark/`, the workflow files, docs, this README — is hashed and
-checked on every PR, *before* anything else runs:
-
-```yaml
-# .github/workflows/score-submission.yml, first real step
-- name: Verify protected files were not modified
-  run: python -m scoring.integrity
-```
-
-If your PR changes, deletes, or adds anything outside your own
-`submissions/` folder, this step fails immediately and your PR is
-disqualified — the scoring engine never runs. If you think starter code
-has an actual bug, say so in your PR description instead of editing it.
-
-This protection applies to use case 2's autoscoring pipeline. Use case 1
-does not use the autoscoring engine — its files are still protected by
-the integrity check, but its evaluation is manual.
+**Both use cases are evaluated manually, by a human reading your
+submission against a private answer key** — there's no automated
+scoring or CI in this repo for either one.
 
 ---
 

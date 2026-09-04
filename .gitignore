@@ -3,13 +3,6 @@ __pycache__/
 .venv/
 venv/
 *.egg-info/
-.pytest_cache/
-.ruff_cache/
-
-# local scoring scratch output - never commit, CI writes fresh each run
-**/.score/
-score-output/
-reports/
 
 .env
 *.log

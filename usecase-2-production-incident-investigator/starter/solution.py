@@ -1,6 +1,5 @@
-"""Copy this file into your
-submissions/<your-name>/usecase-2-production-incident-investigator/ folder
-and implement investigate(). See ../README.md for the full brief.
+"""Copy this file into your own working copy as solution.py and implement
+investigate(). See ../README.md for the full brief.
 
 Required interface - do not change the signature:
 

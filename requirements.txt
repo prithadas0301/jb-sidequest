@@ -1,9 +1,4 @@
-# Shared across scoring/ and every use case's tests/.
-pytest==8.3.3
-pytest-json-report==1.5.0
-ruff==0.6.9
-radon==6.0.1
-
+# Deps for use case 2's solution.py (and your own script to run it).
 numpy==2.1.2
 pandas==2.2.3
 scikit-learn==1.5.2

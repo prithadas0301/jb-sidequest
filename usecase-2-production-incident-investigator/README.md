@@ -142,7 +142,7 @@ you use one.)
 
 ## 🎯 What you're building
 
-In your `submissions/<your-name>/usecase-2-production-incident-investigator/` folder:
+You'll hand the organizer three things:
 
 - **`solution.py`** — your `investigate()`. Copy `starter/solution.py` in
   as your starting point; it lays out a suggested function structure
@@ -160,40 +160,27 @@ In your `submissions/<your-name>/usecase-2-production-incident-investigator/` fo
 
 ## ✅ How this is graded
 
-**Correctness is judged manually**, not by an automated test suite:
-the organizer compares your submitted `answers.json` against a private
-answer key for both incidents — the same qualities the old trusted suite
-used to check (well-formed and internally consistent output;
-`needs_human_review` exactly matching the confidence threshold; incident
-A's high-confidence identification of `payment-gateway-adapter`, an MTTR
-close to 20 minutes, and multi-source evidence; incident B's correctly
-low, flagged confidence) — but read for substance against the key rather
-than pattern-matched by code. That review may itself use an LLM as a
-judge; how the organizer runs that comparison isn't part of this repo.
+**Everything here is judged manually** — there's no test suite or CI in
+this repo. The organizer reads your submitted `answers.json` against a
+private answer key for both incidents, looking for the same qualities a
+trusted test suite would otherwise check:
 
-The other five components are still measured automatically, straight
-off your `solution.py` — nothing about how Correctness is graded changes
-these:
+- Well-formed and internally consistent output — `needs_human_review`
+  exactly matches `confidence_score < 50`.
+- Incident A: high confidence, `payment-gateway-adapter` correctly
+  named, an MTTR close to 20 minutes, and evidence drawn from multiple
+  independent source documents (not just the single most-relevant one).
+- Incident B: correctly *low*, flagged confidence — manufacturing
+  unwarranted confidence here should score worse, not better, than
+  honestly saying "not sure."
+- Free-text fields (`root_cause`, `remediation`) judged for substance,
+  not exact phrasing.
 
-| Component | Weight | What it measures |
-|---|---|---|
-| Correctness | 30% | Your `answers.json` vs. the private answer key, judged manually for both incidents |
-| Performance | 20% | Wall-clock time and peak memory on a padded, much larger corpus (`benchmark/perf_bench.py`) |
-| Reusability | 15% | Function/method complexity, length, docstrings + type hints (see root README) |
-| Code quality | 15% | `ruff` findings per line |
-| Maintainability | 10% | `radon` maintainability index |
-| Completion | 10% | `solution.py`, `answers.json`, and a real `README.md` present |
-
-You can still run the automated portion yourself before submitting:
-```bash
-# from the repo root
-python -m scoring.cli --usecase usecase-2-production-incident-investigator \
-  --submission submissions/<your-name>/usecase-2-production-incident-investigator
-```
-**Ignore the Correctness number this prints** — there's no test suite
-left for it to run, so it isn't a real signal either way. Performance,
-Reusability, Code quality, Maintainability, and Completion are still
-meaningful.
+Your `solution.py` itself (design, clarity, whether it'd hold up as real
+code) and your `README.md`'s design write-up factor into the same manual
+review. That review may itself use an LLM as a judge on the organizer's
+side; how they run that comparison isn't part of this repo — only the
+submission format (`answers.json`) is.
 
 ## 💡 Using Claude (or any AI assistant) here
 
