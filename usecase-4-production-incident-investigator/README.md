@@ -91,6 +91,11 @@ down.
   only becomes clear when you notice that *logs*, *deployment history*,
   *known issues*, *the runbook*, and *a previous incident* are all
   independently telling you the same thing.
+- **Not every log line is about this incident.** Both logs files carry a
+  handful of entries from other, unrelated known issues (checkout
+  latency, search indexing, email templating, and so on) alongside the
+  ones that actually matter — real logs are not pre-filtered to just the
+  incident you're investigating, and neither is this one.
 - **Calibration, not confidence theater.** It's easy to always emit a
   plausible-sounding root cause with a high confidence number attached —
   that's what a fluent AI assistant will hand you if you don't push back.
