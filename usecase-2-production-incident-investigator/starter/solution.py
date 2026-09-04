@@ -1,5 +1,5 @@
-"""Copy this file into your own working copy as solution.py and implement
-investigate(). See ../README.md for the full brief.
+"""Copy this file into your own submissions/<your-name>/solution.py and
+implement investigate(). See ../README.md for the full brief.
 
 Required interface - do not change the signature:
 

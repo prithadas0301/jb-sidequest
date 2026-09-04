@@ -64,13 +64,13 @@ against a private answer key, not exact phrasing.
 
 There's no live code execution during grading. Instead, **you run your
 own `investigate()`** against both incidents' queries and commit the
-output:
+output to your own folder under `submissions/<your-name>/`:
 
 1. For each incident directory in `data/` (`incident_a_pool_exhaustion`,
    `incident_b_ambiguous_delay`), load its query and corpus — e.g. via
    `data/loader.py`'s `load_incident(name)` — and call your `investigate()`.
-2. Write both reports to a single `answers.json` in your submission
-   folder, keyed by incident directory name:
+2. Write both reports to a single `answers.json` in
+   `submissions/<your-name>/`, keyed by incident directory name:
 
    ```json
    {
@@ -142,7 +142,17 @@ you use one.)
 
 ## 🎯 What you're building
 
-You'll hand the organizer three things:
+In `submissions/<your-name>/` (create this folder yourself — see
+[`submissions/README.md`](submissions/README.md)):
+
+```
+usecase-2-production-incident-investigator/
+└── submissions/
+    └── <your-name>/
+        ├── solution.py
+        ├── answers.json
+        └── README.md
+```
 
 - **`solution.py`** — your `investigate()`. Copy `starter/solution.py` in
   as your starting point; it lays out a suggested function structure

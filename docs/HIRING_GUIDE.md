@@ -33,10 +33,11 @@ Make sure they know to bring their own key.
 
 Each participant implements `investigate()` in their own copy of
 `starter/solution.py`, runs it against both incidents themselves (via
-`data/loader.py`'s `load_incident(name)`), and gives you back
-`solution.py` + `answers.json` (their `investigate()` output for both
-incidents, keyed by incident directory name) + a `README.md` covering
-their design, understanding of the problem, and approach.
+`data/loader.py`'s `load_incident(name)`), and adds
+`usecase-2-production-incident-investigator/submissions/<their-name>/`
+with `solution.py` + `answers.json` (their `investigate()` output for
+both incidents, keyed by incident directory name) + a `README.md`
+covering their design, understanding of the problem, and approach.
 
 To evaluate:
 
@@ -76,9 +77,17 @@ manually, reading the source.
 
 ## Collecting submissions
 
-There's no `submissions/` folder or PR-based workflow in this repo
-anymore for either use case — decide how participants get their work to
-you (a shared fork, a zip, a PR into their own fork that you pull from,
-email, whatever fits your process) and track scores in your own
-spreadsheet or tracker. Nothing here assumes a particular delivery
-mechanism.
+**Use case 2** has its own `submissions/<their-name>/` folder inside
+`usecase-2-production-incident-investigator/` — each participant adds
+their own folder there with `solution.py`, `answers.json`, and
+`README.md` (see that use case's `submissions/README.md`). There's no
+PR-based workflow or CI trigger tied to it anymore, just a shared
+convention for where the files live — decide how participants actually
+get you their folder (a shared fork, a zip, a PR into their own fork
+that you pull from, email, whatever fits your process).
+
+**Use case 1** has no equivalent folder — collect source code +
+`submission.json` however fits your process, same as above.
+
+Either way, track scores in your own spreadsheet or tracker; nothing
+here generates a consolidated report for you anymore.

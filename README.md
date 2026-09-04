@@ -78,7 +78,12 @@ jb-sidequest/
     │   ├── incident_a_pool_exhaustion/   7 documents + query.txt (high-confidence scenario)
     │   ├── incident_b_ambiguous_delay/   7 documents + query.txt (low-confidence scenario)
     │   └── loader.py                       loads one incident's query + document corpus
-    └── starter/solution.py           copy this into your own working copy
+    ├── starter/solution.py           copy this into your own submission folder
+    └── submissions/                  your work goes here
+        └── <your-name>/
+            ├── solution.py
+            ├── answers.json
+            └── README.md
 ```
 
 **Use case 1** provides method-only interfaces — function signatures and
@@ -120,19 +125,22 @@ start". Key documents: `PROBLEM_STATEMENT.md`, `DATA_NOTES.md`,
 ```bash
 pip install -r requirements.txt
 cd usecase-2-production-incident-investigator
-cp starter/solution.py solution.py   # your own working copy
+mkdir -p submissions/<your-name>
+cp starter/solution.py submissions/<your-name>/solution.py
 
-# implement investigate() in solution.py, then run it against both
-# incidents yourself and save the output as answers.json, e.g.:
+# implement investigate() in submissions/<your-name>/solution.py, then
+# run it against both incidents yourself and save the output as
+# submissions/<your-name>/answers.json, e.g.:
 python -c "
 from data.loader import load_incident
-import json
+import json, sys
+sys.path.insert(0, 'submissions/<your-name>')
 import solution
 answers = {}
 for name in ['incident_a_pool_exhaustion', 'incident_b_ambiguous_delay']:
     query, corpus = load_incident(name)
     answers[name] = solution.investigate(query, corpus)
-with open('answers.json', 'w') as f:
+with open('submissions/<your-name>/answers.json', 'w') as f:
     json.dump(answers, f, indent=2)
 "
 ```
@@ -157,9 +165,10 @@ full schema and `sample_submission.json` for a worked example.
 
 ### Use case 2
 
-Submit three things to the organizer: `solution.py`, the `answers.json`
-it produced for both incidents (see that use case's README, "What you
-submit"), and a `README.md` covering, in your own words:
+Create `usecase-2-production-incident-investigator/submissions/<your-name>/`
+with three files: `solution.py`, the `answers.json` it produced for both
+incidents (see that use case's README, "What you submit"), and a
+`README.md` covering, in your own words:
 
 - **Design** — how your solution is structured and why
 - **Your understanding of the problem** — what the actual difficulty
