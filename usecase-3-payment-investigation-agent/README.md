@@ -1,212 +1,67 @@
-# 🧩 jb-sidequest
+# Julius Baer AI Hackathon — Payment Investigation Assistant
 
-## 📋 Overview
+Build a small AI-powered assistant for a bank's payment operations and
+compliance team.  The assistant answers natural-language
+payment-investigation questions by combining structured data, policy
+documents (via RAG), deterministic tools, and an LLM agent.
 
-**Time budget**: ~1 hour per use case
-**No banking/domain knowledge needed** for any use case — 3 and 4 use a
-payment/production-ops scenario but don't require prior experience in
-either to solve.
-**No API keys or paid accounts required for any use case** — including
-use case 4, which is RAG-shaped (retrieval over a document corpus) but
-deliberately doesn't require an LLM; see its README for why.
+## Documentation
 
-| # | Directory | Track | The trap |
-|---|---|---|---|
-| 1 | [`usecase-1-streaming-topk-anomaly/`](usecase-1-streaming-topk-anomaly/) | Python / data structures | Looks like a list and a sort — the naive version passes small tests and quietly fails under load and adversarial data |
-| 2 | [`usecase-2-churn-leakage-imbalance/`](usecase-2-churn-leakage-imbalance/) | Traditional ML / Python | One feature is a near-perfect predictor on training data for reasons that don't hold up on the held-out set — plus an imbalanced label that punishes the wrong metric |
-| 3 | [`usecase-3-payment-investigation/`](usecase-3-payment-investigation/) | Python / data structures | Order-dependent bugs, un-deduplicated webhook redeliveries, and the classic float-money rounding trap, all under a performance requirement that punishes an O(n²) scan |
-| 4 | [`usecase-4-production-incident-investigator/`](usecase-4-production-incident-investigator/) | Retrieval + evidence correlation (RAG-shaped, no LLM) | Retrieval alone gets you the most keyword-relevant document, not the root cause — the real difficulty is correlating multiple independent sources and calibrating a confidence score that's honestly low when the evidence actually is thin |
+Follow the reading order in `PARTICIPANT_INSTRUCTIONS.md` → "Before you
+start".  All documents:
 
-Read each use case's own `README.md` before starting — full spec,
-starter code, exact scoring breakdown. Attempt as many as you like; one
-done well beats four done halfway.
+| File                              | Purpose                          |
+|-----------------------------------|----------------------------------|
+| `PROBLEM_STATEMENT.md`            | What you are building            |
+| `PARTICIPANT_INSTRUCTIONS.md`     | Your three tasks and schedule    |
+| `DATA_NOTES.md`                   | Important data clarifications    |
+| `AI_ARCHITECTURE_REQUIREMENTS.md` | Required components              |
+| `EVALUATION_CRITERIA.md`          | How submissions are scored       |
+| `SUBMISSION_GUIDE.md`             | Required output format           |
+| `ARCHITECTURE_HINTS.md`           | Architecture guidance (optional) |
+| `WHY_METHODS_ONLY.md`             | Why interfaces are empty         |
 
----
+## Directory structure
 
-## 🗂️ Project structure
-
-```
-jb-sidequest/
-├── README.md                     you are here — candidate-facing overview
-├── LICENSE
-├── requirements.txt                shared deps for scoring/ + all use cases
-├── .gitignore
-│
-├── docs/
-│   └── HIRING_GUIDE.md             for reviewers/admins, not candidates
-│
-├── scripts/
-│   ├── setup_candidate_branch.sh   creates your branch + starter files
-│   └── generate_protected_manifest.py   admin-only, regenerates the integrity manifest
-│
-├── scoring/                        shared autoscoring engine (do not edit - protected)
-│   ├── cli.py                        entry point: `python -m scoring.cli --usecase ... --submission ...`
-│   ├── integrity.py                  anti-tamper check, runs first in CI
-│   ├── detect_submission.py          figures out who/what a PR is scoring
-│   ├── submission_loader.py          dynamically imports your solution.py
-│   ├── correctness.py                runs a use case's pytest suite -> score
-│   ├── performance.py                runs a use case's benchmark -> score
-│   ├── reusability.py                complexity + length + docstring/type-hint coverage -> score
-│   ├── code_quality.py               ruff findings -> score
-│   ├── maintainability.py            radon maintainability index -> score
-│   ├── completion.py                 required files + README content -> score
-│   ├── report.py                     combines the above into score_report.{md,json}
-│   └── PROTECTED_MANIFEST.json       sha256 of every protected file (see below)
-│
-├── .github/workflows/
-│   └── score-submission.yml        the autoscoring pipeline (triggers on PR)
-│
-├── usecase-1-streaming-topk-anomaly/
-│   ├── README.md                     the brief, spec, and scoring table
-│   ├── scoring_hooks.py              this use case's weights + performance thresholds
-│   ├── data/generate_data.py         deterministic synthetic stream generator
-│   ├── tests/test_solution.py        the trusted spec (do not edit)
-│   ├── benchmark/perf_bench.py       what scoring_hooks.run_benchmark() calls
-│   └── starter/solution.py           copy this into your submission folder
-│
-├── usecase-2-churn-leakage-imbalance/
-│   └── (same shape as above, plus data/train.csv + test_features.csv,
-│        generated by data/generate_data.py - not committed, see its README)
-│
-├── usecase-3-payment-investigation/
-│   └── (same shape as usecase 1)
-│
-├── usecase-4-production-incident-investigator/
-│   ├── data/incident_a_pool_exhaustion/   7 documents + query.txt (high-confidence scenario)
-│   ├── data/incident_b_ambiguous_delay/   7 documents + query.txt (low-confidence scenario)
-│   ├── data/loader.py                       loads one incident's query + document corpus
-│   └── (otherwise same shape as usecase 1)
-│
-└── submissions/                    your work goes here
-    └── <your-github-username>/
-        └── usecase-1-streaming-topk-anomaly/
-            ├── solution.py
-            └── README.md
+```text
+usecase-3-payment-investigation-agent/
+├── main.py                  # Entry point — run this
+├── requirements.txt         # Python dependencies
+├── .env.example             # LLM configuration template
+├── data/
+│   ├── clients.csv          # 50 synthetic clients
+│   ├── payments.csv         # 184 synthetic payments
+│   ├── data_dictionary.csv  # Field descriptions
+│   └── policies/            # 9 policy docs (5 relevant, 4 decoys)
+├── questions/
+│   └── questions.json       # 10 evaluation questions
+├── tools/                   # Data-access tools (implement these)
+│   ├── client_tools.py
+│   ├── payment_tools.py
+│   └── policy_tools.py
+├── rag/                     # RAG pipeline (implement this)
+│   └── pipeline.py
+└── agent/                   # AI agent (implement this)
+    └── agent.py
 ```
 
-**The pattern every use case follows**: `README.md` (the brief),
-`scoring_hooks.py` (weights + thresholds — never needs editing),
-`data/` or nothing (synthetic input generation), `tests/test_solution.py`
-(the actual spec, trusted, read-only), `benchmark/perf_bench.py`
-(performance harness), `starter/solution.py` (what you copy into your
-submission and fill in). Everything under `usecase-*/` other than what
-you create in `submissions/` is protected — see below.
-
----
-
-## 🚀 Getting started
+## Quick start
 
 ```bash
-git clone <this-repo-url>
-cd jb-sidequest
+python -m venv .venv && source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-
-./scripts/setup_candidate_branch.sh <your-github-username> usecase-1-streaming-topk-anomaly
-
-cd usecase-1-streaming-topk-anomaly
-# usecase-2 also needs: python data/generate_data.py — see its own README
-pytest tests/ -v          # red at first, that's expected - start implementing
+cp .env.example .env  # Add your LLM API key
+python main.py --questions questions.json --output submission.json
 ```
 
----
+## What you must implement
 
-## 📁 Submission requirements
+The package intentionally contains **method-only interfaces** — function
+signatures and contracts are provided, but no implementations.
 
-```
-submissions/
-└── <your-github-username>/
-    └── usecase-1-streaming-topk-anomaly/
-        ├── solution.py
-        └── README.md
-```
-
-Your `README.md` **must** cover, in your own words:
-
-- **Design** — how your solution is structured and why
-- **Your understanding of the problem** — what the actual difficulty
-  was, in your assessment
-- **Why you took the approach you did** — including anything you tried
-  and abandoned, and tradeoffs made under the time limit
-- **Your name, phone number, and email**
-
-This is graded (Completion, below) and it's what a reviewer reads first.
-
-### Submitting
-
-```bash
-git add submissions/<your-github-username>/
-git commit -m "Attempt usecase-1-streaming-topk-anomaly"
-git push -u origin submission/<your-github-username>
-```
-Open a pull request into `main`. This triggers autoscoring automatically
-— check the PR's **Checks** tab (or **Actions** on the repo) for the
-report.
-
-**One candidate per PR.** Attempting more than one use case? Put them
-all under your same `submissions/<your-github-username>/` folder and
-submit together — don't mix submissions from different people in one PR.
-
----
-
-## ✅ How autoscoring works
-
-Every use case is scored on 6 weighted components — weights and
-thresholds live in that use case's own `scoring_hooks.py`, nothing hidden
-except (a) whether a protected file's hash matches, and (b) use case 2's
-held-out labels.
-
-| Component | What it measures |
-|---|---|
-| **Correctness** | The use case's real pytest suite |
-| **Performance** | A timed benchmark against declared thresholds — where a wrong-complexity solution loses points a correctness test can't catch |
-| **Reusability** | Cyclomatic complexity, function length, and docstring+type-hint coverage on public functions, averaged |
-| **Code quality** | `ruff` findings per line, submission files only |
-| **Maintainability** | `radon` maintainability index, submission files only |
-| **Completion** | Required files present and non-trivial, README actually contains what's asked for above |
-
-Run the exact same check yourself before pushing:
-```bash
-python -m scoring.cli --usecase usecase-1-streaming-topk-anomaly \
-  --submission submissions/<your-github-username>/usecase-1-streaming-topk-anomaly
-```
-
-**Autoscoring runs automatically the moment your PR merges into (or is
-opened against) `main` with a change under `submissions/**`** — the
-workflow trigger is path-filtered to that folder specifically so pushing
-to your branch or opening the PR is all it takes, no manual step.
-
----
-
-## 🔒 Protecting the autoscoring engine
-
-**You may only add new files under `submissions/<your-username>/`.**
-Everything else — `scoring/`, every use case's `tests/`, `scoring_hooks.py`,
-`benchmark/`, the workflow files, docs, this README — is hashed and
-checked on every PR, *before* anything else runs:
-
-```yaml
-# .github/workflows/score-submission.yml, first real step
-- name: Verify protected files were not modified
-  run: python -m scoring.integrity
-```
-
-If your PR changes, deletes, or adds anything outside your own
-`submissions/` folder, this step fails immediately and your PR is
-disqualified — the scoring engine never runs. If you think starter code
-has an actual bug, say so in your PR description instead of editing it.
-
----
-
-## 💡 Using Claude (or any AI assistant) well
-
-You're welcome to use AI tools here — that's realistic, not a shortcut.
-It's genuinely useful for explaining a concept you're rusty on, reviewing
-a solution once you've already spotted a specific concern, and handling
-boilerplate. What it won't reliably do: a fluent, obvious-looking first
-draft from an assistant tends to pass small correctness checks and fail
-somewhere that actually matters — read each use case's README carefully
-and test against the trusted suite yourself before trusting a first pass.
-
----
-
-Good luck! 🚀
+1. **Tools** — `tools/*.py` — deterministic data access (CSV lookups,
+   aggregation, 24h window analysis)
+2. **RAG** — `rag/pipeline.py` — policy document retrieval (load, chunk,
+   index, retrieve)
+3. **Agent** — `agent/agent.py` — LLM/tool-calling loop that decides
+   which tools to call and synthesizes a grounded answer
