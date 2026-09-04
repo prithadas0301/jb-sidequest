@@ -1,0 +1,82 @@
+name: Score submission
+
+# One generic workflow handles every candidate + every use case: which
+# use case(s) to grade is derived from which submissions/<name>/usecase-*/
+# folder(s) the PR touches (see scoring/detect_submission.py).
+on:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "submissions/**"
+  push:
+    branches: ["submission/**"]
+    paths:
+      - "submissions/**"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  score:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # No dependencies needed for this - integrity.py is pure stdlib on
+      # purpose, so a tampered PR is rejected before any submission code
+      # (or even our own requirements.txt) is ever installed.
+      #
+      # PROTECTED_MANIFEST_SHA256 is a repository VARIABLE (Settings ->
+      # Secrets and variables -> Actions -> Variables), not a file in the
+      # repo - see docs/HIRING_GUIDE.md "One-time repo setup".
+      - name: Verify protected files were not modified
+        env:
+          PROTECTED_MANIFEST_SHA256: ${{ vars.PROTECTED_MANIFEST_SHA256 }}
+        run: python -m scoring.integrity
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Determine candidate + use case(s) touched by this PR
+        id: detect
+        run: |
+          git fetch origin main
+          BASE="$(git merge-base origin/main HEAD)"
+          git diff --name-only "$BASE" HEAD > changed_files.txt
+          cat changed_files.txt
+          python -m scoring.detect_submission < changed_files.txt >> "$GITHUB_OUTPUT"
+
+      - name: Score each use case attempted
+        id: score
+        env:
+          ML_HOLDOUT_SEED: ${{ secrets.ML_HOLDOUT_SEED }}
+        run: |
+          set -e
+          CANDIDATE="${{ steps.detect.outputs.candidate }}"
+          IFS=',' read -ra USECASES <<< "${{ steps.detect.outputs.usecases }}"
+          FAIL=0
+          for UC in "${USECASES[@]}"; do
+            echo "## Scoring $UC for $CANDIDATE" >> "$GITHUB_STEP_SUMMARY"
+            python -m scoring.cli \
+              --usecase "$UC" \
+              --submission "submissions/$CANDIDATE/$UC" \
+              --out-dir "score-output/$UC" || FAIL=1
+            cat "score-output/$UC/score_report.md" >> "$GITHUB_STEP_SUMMARY" || true
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+          done
+          exit $FAIL
+
+      - name: Upload score reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: score-reports
+          path: score-output/**

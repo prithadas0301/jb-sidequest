@@ -1,0 +1,22 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# local scoring scratch output - never commit, CI writes fresh each run
+**/.score/
+score-output/
+reports/
+
+# regenerated deterministically by each use case's data/generate_data.py
+usecase-1-streaming-topk-anomaly/data/*.csv
+usecase-1-streaming-topk-anomaly/data/*.json
+usecase-2-churn-leakage-imbalance/data/*.csv
+usecase-3-payment-investigation/data/*.json
+
+.env
+*.log
+.DS_Store
