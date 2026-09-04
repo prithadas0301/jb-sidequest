@@ -94,10 +94,13 @@ and AI agent, then run `python main.py` to produce `submission.json`.
 (the function you implement); `data/loader.py` is a small helper for
 loading each incident's query + corpus, not something you need to
 modify. You run your own `investigate()` against both incidents and
-produce `answers.json` yourself — there's no test suite or CI in this
-repo for either use case; both are evaluated the same way, by a human
-(and possibly an LLM-as-judge review) reading your submitted output
-against a private answer key.
+produce `answers.json` yourself — there's no test suite or scoring logic
+in this repo for either use case; both are evaluated the same way, by a
+human (and possibly an LLM-as-judge review) reading your submitted
+output against a private answer key. Use case 2 does have one small CI
+workflow (`.github/workflows/notify-judge.yml`) — it does no grading
+itself, it just pings an external judge repo when a submission changes;
+see "Automated notification" below.
 
 ---
 
@@ -187,8 +190,26 @@ This `README.md` is graded alongside the rest and it's what a reviewer
 reads first.
 
 **Both use cases are evaluated manually, by a human reading your
-submission against a private answer key** — there's no automated
-scoring or CI in this repo for either one.
+submission against a private answer key** — no grading or scoring logic
+lives in this repo for either one.
+
+---
+
+## Automated notification (use case 2 only)
+
+`.github/workflows/notify-judge.yml` runs on every push that touches
+`usecase-2-production-incident-investigator/submissions/**`. It does
+exactly one thing: fires a `repository_dispatch` at a separate,
+independent judge repo so a submission gets picked up promptly instead
+of waiting on that repo's own polling schedule. It never checks out this
+repo's contents, never scores anything, and never writes anything back
+here — see the workflow file's own comments.
+
+**Organizer setup**: this needs a `JUDGE_DISPATCH_TOKEN` secret (repo
+Settings → Secrets and variables → Actions) — a GitHub PAT with `repo`
+scope, since it has to call another repository's API. Nothing else in
+this repo depends on it; if it's missing or expired, submissions still
+work exactly the same, they just aren't proactively pinged.
 
 ---
 

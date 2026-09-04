@@ -5,9 +5,12 @@ AI agent challenge (payment investigation assistant requiring an LLM API
 key); use case 2 is a retrieval + evidence-correlation problem
 (RAG-shaped, deliberately no LLM required to build). Both are evaluated
 manually, by a human reading the participant's submitted output against
-a private answer key — there is no autoscoring, CI, or integrity-checking
-machinery in this repo for either one. This doc covers the parts
-participants don't need.
+a private answer key — there is no autoscoring or integrity-checking
+machinery in this repo for either one, and no grading logic of any kind.
+Use case 2 does have one tiny CI workflow that pings a separate judge
+repo on submission changes (see "One-time repo setup" below) - it
+notifies, it doesn't grade. This doc covers the parts participants
+don't need.
 
 ## Evaluation model
 
@@ -81,13 +84,25 @@ manually, reading the source.
 `usecase-2-production-incident-investigator/` — each participant adds
 their own folder there with `solution.py`, `answers.json`, and
 `README.md` (see that use case's `submissions/README.md`). There's no
-PR-based workflow or CI trigger tied to it anymore, just a shared
-convention for where the files live — decide how participants actually
+PR-based grading workflow tied to it — decide how participants actually
 get you their folder (a shared fork, a zip, a PR into their own fork
-that you pull from, email, whatever fits your process).
+that you pull from, email, whatever fits your process). A push to `main`
+under that path does fire `.github/workflows/notify-judge.yml`, but that
+workflow only pings an external judge repo - it doesn't grade, gate, or
+block anything here.
 
 **Use case 1** has no equivalent folder — collect source code +
 `submission.json` however fits your process, same as above.
 
 Either way, track scores in your own spreadsheet or tracker; nothing
 here generates a consolidated report for you anymore.
+
+## One-time repo setup: the judge-notification token
+
+`.github/workflows/notify-judge.yml` needs a `JUDGE_DISPATCH_TOKEN`
+secret (Settings → Secrets and variables → Actions → New repository
+secret) to call the judge repo's API — a GitHub PAT with `repo` scope
+(classic) works, since it needs to reach a different repository than
+the one the workflow runs in. Without this secret set, submissions still
+work exactly the same; the workflow just fails silently to notify (check
+the Actions tab if you're not seeing prompt pickups on the judge side).

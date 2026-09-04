@@ -170,10 +170,13 @@ usecase-2-production-incident-investigator/
 
 ## ✅ How this is graded
 
-**Everything here is judged manually** — there's no test suite or CI in
-this repo. The organizer reads your submitted `answers.json` against a
-private answer key for both incidents, looking for the same qualities a
-trusted test suite would otherwise check:
+**Everything here is judged manually** — there's no test suite or
+grading logic in this repo (a small CI workflow pings an external judge
+repo when you push to your `submissions/` folder, but it doesn't grade
+anything itself — see the root README's "Automated notification"). The
+organizer reads your submitted `answers.json` against a private answer
+key for both incidents, looking for the same qualities a trusted test
+suite would otherwise check:
 
 - Well-formed and internally consistent output — `needs_human_review`
   exactly matches `confidence_score < 50`.
