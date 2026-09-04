@@ -69,9 +69,11 @@ an LLM to write the narrative. That needs an API key, and every other use
 case in this repo deliberately doesn't — so this one doesn't either. What
 you're building is the two halves that *are* fully autogradable:
 
-1. **Retrieval** — rank the corpus against the query (the starter scaffolds
-   this with TF-IDF cosine similarity; that's genuinely representative of
-   how retrieval works, just without a vector database behind it).
+1. **Retrieval** — rank the corpus against the query yourself (TF-IDF
+   cosine similarity, plain bag-of-words overlap, whatever approach you
+   choose — that's genuinely representative of how retrieval works, just
+   without a vector database behind it). The starter leaves this as a
+   stub; ingestion and ranking are part of what's graded, not given.
 2. **Structured correlation and confidence calibration** — the actual
    graded difficulty. Do independent sources agree with each other, and
    does your confidence score honestly reflect that?
@@ -113,8 +115,9 @@ down.
 In your `submissions/<your-name>/usecase-4-production-incident-investigator/` folder:
 
 - **`solution.py`** — your `investigate()`. Copy `starter/solution.py` in
-  as your starting point; it has working retrieval and a stubbed-out
-  correlation step.
+  as your starting point; it lays out a suggested function structure
+  (ingest, retrieve, correlate, calibrate) but every step is a stub —
+  retrieval included — for you to implement.
 - **`README.md`** — see the root [README.md](../README.md)'s "Submission
   requirements" for what this needs to contain.
 
