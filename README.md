@@ -1,45 +1,49 @@
-# 🧩 jb-sidequest
+# Julius Baer AI Hackathon — jb-sidequest
 
-## 📋 Overview
+## Overview
 
-**Time budget**: ~1 hour per use case
-**No banking/domain knowledge needed** for any use case — 3 and 4 use a
-payment/production-ops scenario but don't require prior experience in
-either to solve.
-**No API keys or paid accounts required for any use case** — including
-use case 4, which is RAG-shaped (retrieval over a document corpus) but
-deliberately doesn't require an LLM; see its README for why.
+Two use cases, each with a different evaluation model. Read each use
+case's own `README.md` before starting — full spec, starter code, exact
+scoring breakdown. Attempt as many as you like; one done well beats two
+done halfway.
 
-| # | Directory | Track | The trap |
-|---|---|---|---|
-| 1 | [`usecase-1-streaming-topk-anomaly/`](usecase-1-streaming-topk-anomaly/) | Python / data structures | Looks like a list and a sort — the naive version passes small tests and quietly fails under load and adversarial data |
-| 2 | [`usecase-2-churn-leakage-imbalance/`](usecase-2-churn-leakage-imbalance/) | Traditional ML / Python | One feature is a near-perfect predictor on training data for reasons that don't hold up on the held-out set — plus an imbalanced label that punishes the wrong metric |
-| 3 | [`usecase-3-payment-investigation/`](usecase-3-payment-investigation/) | Python / data structures | Order-dependent bugs, un-deduplicated webhook redeliveries, and the classic float-money rounding trap, all under a performance requirement that punishes an O(n²) scan |
-| 4 | [`usecase-4-production-incident-investigator/`](usecase-4-production-incident-investigator/) | Retrieval + evidence correlation (RAG-shaped, no LLM) | Retrieval alone gets you the most keyword-relevant document, not the root cause — the real difficulty is correlating multiple independent sources and calibrating a confidence score that's honestly low when the evidence actually is thin |
+| # | Directory | Track | LLM required? | How it's scored |
+|---|---|---|---|---|
+| 1 | [`usecase-1-payment-investigation-agent/`](usecase-1-payment-investigation-agent/) | AI agent: tools + RAG + LLM orchestration | **Yes** — any LLM provider with tool-calling support | Manual evaluation against a private answer key (see `EVALUATION_CRITERIA.md`) |
+| 2 | [`usecase-2-production-incident-investigator/`](usecase-2-production-incident-investigator/) | Retrieval + evidence correlation (RAG-shaped, no LLM) | No | Autoscoring via GitHub Actions on pull request (6 weighted components) |
 
-Read each use case's own `README.md` before starting — full spec,
-starter code, exact scoring breakdown. Attempt as many as you like; one
-done well beats four done halfway.
+**Use case 1** asks you to build a payment-investigation AI assistant
+that answers 10 natural-language questions by combining structured data,
+policy documents (via RAG), deterministic tools, and an LLM agent. It
+requires an LLM API key (any provider — see `.env.example`). The
+organizer runs your code and evaluates the output against a private
+answer key.
+
+**Use case 2** asks you to build an incident-investigation function that
+correlates evidence across a document corpus and produces a structured
+report with a calibrated confidence score. No LLM, no API key — it's
+purely retrieval + correlation. Submit via pull request and the autoscoring
+pipeline runs automatically.
 
 ---
 
-## 🗂️ Project structure
+## Project structure
 
 ```
 jb-sidequest/
-├── README.md                     you are here — candidate-facing overview
+├── README.md                     you are here — participant-facing overview
 ├── LICENSE
-├── requirements.txt                shared deps for scoring/ + all use cases
+├── requirements.txt                shared deps for scoring/ + use case 2
 ├── .gitignore
 │
 ├── docs/
-│   └── HIRING_GUIDE.md             for reviewers/admins, not candidates
+│   └── HIRING_GUIDE.md             for organizers/admins, not participants
 │
 ├── scripts/
-│   ├── setup_candidate_branch.sh   creates your branch + starter files
+│   ├── setup_candidate_branch.sh   creates your branch + starter files (use case 2)
 │   └── generate_protected_manifest.py   admin-only, regenerates the integrity manifest
 │
-├── scoring/                        shared autoscoring engine (do not edit - protected)
+├── scoring/                        shared autoscoring engine (use case 2 only, do not edit)
 │   ├── cli.py                        entry point: `python -m scoring.cli --usecase ... --submission ...`
 │   ├── integrity.py                  anti-tamper check, runs first in CI
 │   ├── detect_submission.py          figures out who/what a PR is scoring
@@ -56,66 +60,122 @@ jb-sidequest/
 ├── .github/workflows/
 │   └── score-submission.yml        the autoscoring pipeline (triggers on PR)
 │
-├── usecase-1-streaming-topk-anomaly/
+├── usecase-1-payment-investigation-agent/
+│   ├── README.md                     the brief + quick start
+│   ├── main.py                        entry point (do not modify)
+│   ├── requirements.txt               use-case-specific deps (pandas, numpy)
+│   ├── .env.example                   LLM configuration template
+│   ├── sample_submission.json         example output format
+│   ├── PROBLEM_STATEMENT.md           what you are building
+│   ├── PARTICIPANT_INSTRUCTIONS.md    your three tasks and schedule
+│   ├── DATA_NOTES.md                  important data clarifications
+│   ├── AI_ARCHITECTURE_REQUIREMENTS.md  required components
+│   ├── EVALUATION_CRITERIA.md         how submissions are scored
+│   ├── SUBMISSION_GUIDE.md            required output format
+│   ├── ARCHITECTURE_HINTS.md          architecture guidance (optional)
+│   ├── WHY_METHODS_ONLY.md            why interfaces are empty
+│   ├── QUICKSTART.md                  setup + run guide
+│   ├── data/
+│   │   ├── clients.csv                50 synthetic clients
+│   │   ├── payments.csv               184 synthetic payments
+│   │   ├── data_dictionary.csv        field descriptions
+│   │   └── policies/                  9 policy docs (5 relevant, 4 decoys)
+│   ├── questions/
+│   │   └── questions.json             10 evaluation questions
+│   ├── tools/                         data-access tools (implement these)
+│   │   ├── client_tools.py
+│   │   ├── payment_tools.py
+│   │   └── policy_tools.py
+│   ├── rag/                           RAG pipeline (implement this)
+│   │   └── pipeline.py
+│   └── agent/                         AI agent (implement this)
+│       └── agent.py
+│
+├── usecase-2-production-incident-investigator/
 │   ├── README.md                     the brief, spec, and scoring table
 │   ├── scoring_hooks.py              this use case's weights + performance thresholds
-│   ├── data/generate_data.py         deterministic synthetic stream generator
+│   ├── data/
+│   │   ├── incident_a_pool_exhaustion/   7 documents + query.txt (high-confidence scenario)
+│   │   ├── incident_b_ambiguous_delay/   7 documents + query.txt (low-confidence scenario)
+│   │   └── loader.py                       loads one incident's query + document corpus
 │   ├── tests/test_solution.py        the trusted spec (do not edit)
 │   ├── benchmark/perf_bench.py       what scoring_hooks.run_benchmark() calls
 │   └── starter/solution.py           copy this into your submission folder
 │
-├── usecase-2-churn-leakage-imbalance/
-│   └── (same shape as above, plus data/train.csv + test_features.csv,
-│        generated by data/generate_data.py - not committed, see its README)
-│
-├── usecase-3-payment-investigation/
-│   └── (same shape as usecase 1)
-│
-├── usecase-4-production-incident-investigator/
-│   ├── data/incident_a_pool_exhaustion/   7 documents + query.txt (high-confidence scenario)
-│   ├── data/incident_b_ambiguous_delay/   7 documents + query.txt (low-confidence scenario)
-│   ├── data/loader.py                       loads one incident's query + document corpus
-│   └── (otherwise same shape as usecase 1)
-│
 └── submissions/                    your work goes here
     └── <your-github-username>/
-        └── usecase-1-streaming-topk-anomaly/
+        └── usecase-2-production-incident-investigator/
             ├── solution.py
             └── README.md
 ```
 
-**The pattern every use case follows**: `README.md` (the brief),
-`scoring_hooks.py` (weights + thresholds — never needs editing),
-`data/` or nothing (synthetic input generation), `tests/test_solution.py`
-(the actual spec, trusted, read-only), `benchmark/perf_bench.py`
-(performance harness), `starter/solution.py` (what you copy into your
-submission and fill in). Everything under `usecase-*/` other than what
-you create in `submissions/` is protected — see below.
+**Use case 1** provides method-only interfaces — function signatures and
+contracts with no implementations. You implement the tools, RAG pipeline,
+and AI agent, then run `python main.py` to produce `submission.json`.
+
+**Use case 2** follows the autoscoring pattern: `README.md` (the brief),
+`scoring_hooks.py` (weights + thresholds), `tests/test_solution.py` (the
+actual spec, trusted, read-only), `benchmark/perf_bench.py` (performance
+harness), `starter/solution.py` (what you copy into your submission and
+fill in). Everything under `usecase-*/` other than what you create in
+`submissions/` is protected — see below.
 
 ---
 
-## 🚀 Getting started
+## Getting started
+
+### Use case 1 — Payment Investigation Agent
 
 ```bash
-git clone <this-repo-url>
-cd jb-sidequest
+cd usecase-1-payment-investigation-agent
+python -m venv .venv && source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env  # Add your LLM API key
+# Install your chosen LLM SDK, e.g.: pip install openai
+
+python main.py --questions questions/questions.json --output submission.json
+```
+
+Follow the reading order in `PARTICIPANT_INSTRUCTIONS.md` → "Before you
+start". Key documents: `PROBLEM_STATEMENT.md`, `DATA_NOTES.md`,
+`AI_ARCHITECTURE_REQUIREMENTS.md`, `EVALUATION_CRITERIA.md`,
+`SUBMISSION_GUIDE.md`.
+
+### Use case 2 — Production Incident Investigator
+
+```bash
 pip install -r requirements.txt
 
-./scripts/setup_candidate_branch.sh <your-github-username> usecase-1-streaming-topk-anomaly
+./scripts/setup_candidate_branch.sh <your-github-username> usecase-2-production-incident-investigator
 
-cd usecase-1-streaming-topk-anomaly
-# usecase-2 also needs: python data/generate_data.py — see its own README
+cd usecase-2-production-incident-investigator
 pytest tests/ -v          # red at first, that's expected - start implementing
 ```
 
 ---
 
-## 📁 Submission requirements
+## Submission requirements
+
+### Use case 1 (manual evaluation)
+
+Run the official command and submit the resulting `submission.json` along
+with your source code:
+
+```bash
+python main.py --questions questions/questions.json --output submission.json
+```
+
+Your output must contain exactly 10 JSON objects (one per question), each
+with the required fields: `question_id`, `payment_id`, `answer`,
+`citations`, `facts`, `tools_used`. See `SUBMISSION_GUIDE.md` for the
+full schema and `sample_submission.json` for a worked example.
+
+### Use case 2 (autoscoring via PR)
 
 ```
 submissions/
 └── <your-github-username>/
-    └── usecase-1-streaming-topk-anomaly/
+    └── usecase-2-production-incident-investigator/
         ├── solution.py
         └── README.md
 ```
@@ -131,29 +191,31 @@ Your `README.md` **must** cover, in your own words:
 
 This is graded (Completion, below) and it's what a reviewer reads first.
 
-### Submitting
+#### Submitting (use case 2)
 
 ```bash
 git add submissions/<your-github-username>/
-git commit -m "Attempt usecase-1-streaming-topk-anomaly"
+git commit -m "Attempt usecase-2-production-incident-investigator"
 git push -u origin submission/<your-github-username>
 ```
+
 Open a pull request into `main`. This triggers autoscoring automatically
 — check the PR's **Checks** tab (or **Actions** on the repo) for the
 report.
 
-**One candidate per PR.** Attempting more than one use case? Put them
-all under your same `submissions/<your-github-username>/` folder and
-submit together — don't mix submissions from different people in one PR.
+**One participant per PR.** Attempting both use cases? Use case 1 is
+submitted as `submission.json` + source code (manual evaluation); use
+case 2 goes under `submissions/<your-github-username>/` and is submitted
+via PR (autoscoring). Don't mix submissions from different people in one
+PR.
 
 ---
 
-## ✅ How autoscoring works
+## How autoscoring works (use case 2 only)
 
-Every use case is scored on 6 weighted components — weights and
-thresholds live in that use case's own `scoring_hooks.py`, nothing hidden
-except (a) whether a protected file's hash matches, and (b) use case 2's
-held-out labels.
+Use case 2 is scored on 6 weighted components — weights and thresholds
+live in `scoring_hooks.py`, nothing hidden except whether a protected
+file's hash matches.
 
 | Component | What it measures |
 |---|---|
@@ -166,21 +228,25 @@ held-out labels.
 
 Run the exact same check yourself before pushing:
 ```bash
-python -m scoring.cli --usecase usecase-1-streaming-topk-anomaly \
-  --submission submissions/<your-github-username>/usecase-1-streaming-topk-anomaly
+python -m scoring.cli --usecase usecase-2-production-incident-investigator \
+  --submission submissions/<your-github-username>/usecase-2-production-incident-investigator
 ```
 
-**Autoscoring runs automatically the moment your PR merges into (or is
-opened against) `main` with a change under `submissions/**`** — the
-workflow trigger is path-filtered to that folder specifically so pushing
-to your branch or opening the PR is all it takes, no manual step.
+**Autoscoring runs automatically the moment your PR is opened against
+`main` with a change under `submissions/**`** — the workflow trigger is
+path-filtered to that folder specifically so pushing to your branch or
+opening the PR is all it takes, no manual step.
+
+Use case 1 is **not** autoscoring — the organizer runs your code and
+evaluates the output manually. See `EVALUATION_CRITERIA.md` in that use
+case's directory for the scoring rubric.
 
 ---
 
-## 🔒 Protecting the autoscoring engine
+## Protecting the autoscoring engine (use case 2)
 
 **You may only add new files under `submissions/<your-username>/`.**
-Everything else — `scoring/`, every use case's `tests/`, `scoring_hooks.py`,
+Everything else — `scoring/`, use case 2's `tests/`, `scoring_hooks.py`,
 `benchmark/`, the workflow files, docs, this README — is hashed and
 checked on every PR, *before* anything else runs:
 
@@ -195,9 +261,13 @@ If your PR changes, deletes, or adds anything outside your own
 disqualified — the scoring engine never runs. If you think starter code
 has an actual bug, say so in your PR description instead of editing it.
 
+This protection applies to use case 2's autoscoring pipeline. Use case 1
+does not use the autoscoring engine — its files are still protected by
+the integrity check, but its evaluation is manual.
+
 ---
 
-## 💡 Using Claude (or any AI assistant) well
+## Using AI assistants well
 
 You're welcome to use AI tools here — that's realistic, not a shortcut.
 It's genuinely useful for explaining a concept you're rusty on, reviewing
@@ -209,4 +279,4 @@ and test against the trusted suite yourself before trusting a first pass.
 
 ---
 
-Good luck! 🚀
+Good luck!

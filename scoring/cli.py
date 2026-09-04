@@ -1,10 +1,10 @@
-"""Entry point used by CI (and candidates locally) to score one submission
+"""Entry point used by CI (and participants locally) to score one submission
 against one use case.
 
 Usage:
     python -m scoring.cli \
-        --usecase usecase-1-streaming-topk-anomaly \
-        --submission submissions/jane-doe/usecase-1-streaming-topk-anomaly \
+        --usecase usecase-2-production-incident-investigator \
+        --submission submissions/jane-doe/usecase-2-production-incident-investigator \
         --out-dir score-output
 
 Each usecase-*/ directory must contain a `scoring_hooks.py` exposing:
@@ -45,7 +45,7 @@ def _load_hooks(usecase_dir: Path):
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--usecase", required=True, help="e.g. usecase-1-streaming-topk-anomaly")
+    parser.add_argument("--usecase", required=True, help="e.g. usecase-2-production-incident-investigator")
     parser.add_argument("--submission", required=True, help="Path to submissions/<name>/<usecase>/")
     parser.add_argument("--out-dir", default=None, help="Where to write score_report.{json,md}")
     parser.add_argument("--fail-under", type=float, default=None, help="Exit non-zero if total < this")

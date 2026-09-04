@@ -1,4 +1,4 @@
-"""Performance benchmark for use case 4, invoked by scoring_hooks.run_benchmark.
+"""Performance benchmark for use case 2, invoked by scoring_hooks.run_benchmark.
 Builds a much larger synthetic corpus (many more log lines, padded
 documents) than either graded incident, to catch an approach that
 rescans/re-embeds the whole corpus in a way that doesn't scale - e.g.

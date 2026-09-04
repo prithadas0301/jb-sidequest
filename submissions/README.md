@@ -1,17 +1,19 @@
 # submissions/
 
-Every candidate's work lives here, one folder per person:
+Every participant's work for use case 2 (autoscoring) lives here, one
+folder per person:
 
 ```
 submissions/
 └── <your-github-username>/
-    └── usecase-1-streaming-topk-anomaly/
+    └── usecase-2-production-incident-investigator/
         ├── solution.py
         └── README.md
 ```
 
-You may attempt more than one use case — add another `usecase-*-.../`
-subfolder next to the first, under your same `<your-github-username>/` folder.
+Use case 1 (Payment Investigation Agent) is manually evaluated — submit
+your `submission.json` and source code directly to the organizer, not
+via PR.
 
 See the root [README.md](../README.md) for the full submission workflow
 and what your `README.md` needs to contain, and each `usecase-*/README.md`

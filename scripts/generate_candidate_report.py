@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Scans submissions/ and scores every candidate x use-case pair found,
+"""Scans submissions/ and scores every participant x use-case pair found,
 producing one consolidated report (name, use case attempted, total score,
 per-component breakdown). Admin-only - run from the repo root, after
 pulling the latest merged submissions.
@@ -91,8 +91,8 @@ def write_csv(rows: list[dict], path: Path) -> None:
 
 def write_markdown(rows: list[dict], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    lines = ["# Candidate score report", "", f"{len(rows)} submission(s) scored.", ""]
-    header = ["Candidate", "Use case", "Total", *COMPONENT_COLUMNS]
+    lines = ["# Participant score report", "", f"{len(rows)} submission(s) scored.", ""]
+    header = ["Participant", "Use case", "Total", *COMPONENT_COLUMNS]
     lines.append("| " + " | ".join(header) + " |")
     lines.append("|" + "---|" * len(header))
     for row in sorted(rows, key=lambda r: (r["candidate"], r["usecase"])):
@@ -104,15 +104,15 @@ def write_markdown(rows: list[dict], path: Path) -> None:
         cells += [_fmt(row.get(name)) for name in COMPONENT_COLUMNS]
         lines.append("| " + " | ".join(cells) + " |")
 
-    by_candidate: dict[str, list[dict]] = {}
+    by_participant: dict[str, list[dict]] = {}
     for row in rows:
-        by_candidate.setdefault(row["candidate"], []).append(row)
-    lines += ["", "## By candidate", ""]
-    for candidate, candidate_rows in sorted(by_candidate.items()):
-        attempted = ", ".join(sorted(r["usecase"] for r in candidate_rows))
-        scores = [r["total"] for r in candidate_rows if not r.get("disqualified") and r["total"] is not None]
+        by_participant.setdefault(row["candidate"], []).append(row)
+    lines += ["", "## By participant", ""]
+    for participant, participant_rows in sorted(by_participant.items()):
+        attempted = ", ".join(sorted(r["usecase"] for r in participant_rows))
+        scores = [r["total"] for r in participant_rows if not r.get("disqualified") and r["total"] is not None]
         best = f"{max(scores):.1f}" if scores else "-"
-        lines.append(f"- **{candidate}** — attempted: {attempted}; best score: {best}")
+        lines.append(f"- **{participant}** — attempted: {attempted}; best score: {best}")
 
     path.write_text("\n".join(lines) + "\n")
 

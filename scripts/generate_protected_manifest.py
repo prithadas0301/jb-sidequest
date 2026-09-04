@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Regenerates scoring/PROTECTED_MANIFEST.json from the current tree.
 
-Run this and commit the result whenever you (the challenge author/hiring
-admin) intentionally change anything outside submissions/. This script
+Run this and commit the result whenever you (the hackathon organizer)
+intentionally change anything outside submissions/. This script
 prints the manifest file's own sha256 at the end - update the
 PROTECTED_MANIFEST_SHA256 repository variable (Settings -> Secrets and
 variables -> Actions -> Variables) to match every time you regenerate;

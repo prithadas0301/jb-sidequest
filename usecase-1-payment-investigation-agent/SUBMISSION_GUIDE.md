@@ -2,7 +2,7 @@
 
 ## The official questions
 
-Every candidate receives the SAME:
+Every participant receives the SAME:
 
 ```text
 questions/questions.json
@@ -65,7 +65,7 @@ Example:
 
 ## Important
 
-The organizer evaluator matches the candidate's `question_id` to the exact
+The organizer evaluator matches the participant's `question_id` to the exact
 official question.
 
 Do not change the question or payment ID.

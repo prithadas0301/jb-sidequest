@@ -1,4 +1,4 @@
-"""Scoring configuration consumed by scoring/cli.py. Candidates should not
+"""Scoring configuration consumed by scoring/cli.py. Participants should not
 need to read or modify this file - and per scoring/PROTECTED_MANIFEST.json,
 doing so fails CI's integrity check before scoring even runs.
 """

@@ -1,9 +1,9 @@
-"""Figures out which candidate + which use case(s) a PR/push touches, from
-a list of changed file paths under submissions/. Candidates only ever add
+"""Figures out which participant + which use case(s) a PR/push touches, from
+a list of changed file paths under submissions/. Participants only ever add
 files under submissions/<their-name>/<usecase-dir>/, so that's all the
 workflow needs to dispatch scoring correctly without a per-usecase workflow.
 
-Refuses to guess: a PR must touch exactly one candidate folder.
+Refuses to guess: a PR must touch exactly one participant folder.
 """
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ def known_usecase_dirs(repo_root: Path) -> set[str]:
 
 
 def detect(repo_root: Path, changed_paths: list[str]) -> tuple[str, list[str]]:
-    """Returns (candidate_name, sorted list of usecase dirs touched)."""
+    """Returns (participant_name, sorted list of usecase dirs touched)."""
     submission_paths = [p for p in changed_paths if p.startswith("submissions/")]
     if not submission_paths:
         raise ValueError("No changed files under submissions/ - nothing to score.")
@@ -40,8 +40,8 @@ def detect(repo_root: Path, changed_paths: list[str]) -> tuple[str, list[str]]:
 
     if len(candidates) != 1:
         raise ValueError(
-            f"This PR touches {len(candidates)} candidate folder(s) under submissions/: "
-            f"{sorted(candidates)}. Exactly one candidate per PR - don't mix submissions."
+            f"This PR touches {len(candidates)} participant folder(s) under submissions/: "
+            f"{sorted(candidates)}. Exactly one participant per PR - don't mix submissions."
         )
     if not usecases:
         raise ValueError(
@@ -63,12 +63,12 @@ def main() -> int:
     changed = args.changed_files or [line.strip() for line in sys.stdin if line.strip()]
 
     try:
-        candidate, usecases = detect(repo_root, changed)
+        participant, usecases = detect(repo_root, changed)
     except ValueError as exc:
         print(str(exc), file=sys.stderr)
         return 1
 
-    print(f"candidate={candidate}")
+    print(f"candidate={participant}")
     print(f"usecases={','.join(usecases)}")
     return 0
 
